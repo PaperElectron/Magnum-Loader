@@ -85,8 +85,12 @@ MagnumLoader.prototype.start = function() {
   if(this.states.start) {
     throw new Error('Start state already transitioned to.')
   }
+  var self = this;
   this.states.start = true;
-  this.emit('start')
+  iteratePlugins(startIterator)
+    .then(function(result) {
+      self.emit('start')
+    })
 };
 
 /**
@@ -97,8 +101,16 @@ MagnumLoader.prototype.stop = function() {
   if(this.states.stop) {
     throw new Error('Stop state already transitioned to.')
   }
+  var self = this;
   this.states.stop = true;
-  this.emit('stop')
+  iteratePlugins(stopIterator)
+    .then(function(result) {
+      self.emit('stop')
+    })
+    .catch(function(err){
+      self.emit('error', err)
+      self.emit('stop')
+    })
 };
 MagnumLoader.prototype.getLoaded = function(group) {
   if(group) {
@@ -146,19 +158,19 @@ function validatePlugin(plugin, package) {
   return _.merge(plugin, {meta: pluginMetaData});
 }
 
-function loadRunner(group) {
+function loadIterator(group) {
   var toLoad = []
   var groupPlugins = group.plugins
   var index = groupPlugins.length - 1;
 
-  instance.Logger.log(instance.output.loadingPlugins(group.name));
+  instance.Logger.log(instance.output['load'].announce(group.name));
 
   while (index >= 0) {
     var toResolve = (function(p) {
       return function(resolve, reject){
         return p.load(instance.injector.inject, function(err, toInject){
 
-          instance.Logger.log(instance.output.pluginLoaded(p.meta.name));
+          instance.Logger.log(instance.output['load'].individual(p.meta.name));
 
           p.meta.loaded = true
           resolve({meta: p.meta, returned: toInject})
@@ -192,28 +204,119 @@ function loadRunner(group) {
   })
 }
 
-function loadIterator(plugins) {
-  var index = plugins.length - 1
-  function build() {
-    var currentPlugin = plugins[index]
-    index -= 1;
-    if(currentPlugin) {
-      return loadRunner(currentPlugin)
-          .then(function(d) {
-            return build()
+function startIterator(group) {
+  var toStart = []
+  var groupPlugins = group.plugins;
+  var index = groupPlugins.length - 1
+
+  instance.Logger.log(instance.output['start'].announce(group.name));
+
+  while (index >= 0) {
+    var toResolve = (function(p) {
+      return function(resolve, reject){
+        return p.start(function(err){
+
+          instance.Logger.log(instance.output['start'].individual(p.meta.name));
+
+          p.meta.started = true;
+          resolve(p.meta)
         })
+      }
+    })(groupPlugins[index]);
+
+    index -= 1;
+    toStart.push(new Promise(toResolve))
+  }
+  return Promise.all(toStart)
+}
+function stopIterator(group) {
+  var toStop = []
+  var groupPlugins = group.plugins;
+  var index = groupPlugins.length - 1
+
+  instance.Logger.log(instance.output['stop'].announce(group.name));
+
+  while (index >= 0) {
+    var toResolve = (function(p) {
+      return function(resolve, reject){
+        var timer = setTimeout(function(){
+          reject(new Error('Timeout exceeded attempting to stop ' + p.meta.name))
+        }, 2000)
+        return p.stop(function(err){
+          clearTimeout(timer);
+          instance.Logger.log(instance.output['stop'].individual(p.meta.name));
+
+          p.meta.stopped = true;
+          resolve(p.meta)
+        })
+      }
+    })(groupPlugins[index]);
+
+    index -= 1;
+    toStop.push(new Promise(toResolve))
+  }
+  return Promise.all(toStop)
+}
+
+var actions = {
+  load: function(p) {
+    return function(resolve, reject){
+      return p.load(instance.injector.inject, function(err, toInject){
+
+        instance.Logger.log(instance.output['load'].individual(p.meta.name));
+
+        p.meta.loaded = true
+        resolve({meta: p.meta, returned: toInject})
+      })
     }
-    return plugins
+  },
+  start: function(p) {
+    return function(resolve, reject){
+      return p.start(function(err){
+
+        instance.Logger.log(instance.output['start'].individual(p.meta.name));
+
+        p.meta.started = true;
+        resolve(p.meta)
+      })
+    }
+  },
+  stop: function(p) {
+    return function(resolve, reject){
+      var timer = setTimeout(function(){
+        reject(new Error('Timeout exceeded attempting to stop ' + p.meta.name))
+      }, 2000)
+      return p.stop(function(err){
+        clearTimeout(timer);
+        instance.Logger.log(instance.output['stop'].individual(p.meta.name));
+
+        p.meta.stopped = true;
+        resolve(p.meta)
+      })
+    }
+  }
+};
+
+function iterators(group, action){
+  var toIterate = [];
+  var groupPlugins = group.plugins;
+  var index = groupPlugins.length - 1;
+
+  instance.logger.log(instance.output[action].announce)
+
+  var varargs = [];
+  if(action === 'load'){
+    varargs.push(instance.injector.inject);
+  }
+  varargs.push(actions[action])
+
+  while (index >= 0){
+    var toResolve = actions[action](p)
+    index -= 1;
+    toIterate.push(new Promise(toResolve))
   }
 
-  return build()
-
-}
-function startIterator(plugins) {
-
-}
-function stopIterator(plugins) {
-
+  return Promise.all(toIterate)
 }
 
 function iteratePlugins(iterator) {
@@ -231,7 +334,7 @@ function iteratePlugins(iterator) {
     var currentPlugin = pluginArr[index]
     index -= 1;
     if(currentPlugin) {
-      return loadRunner(currentPlugin)
+      return iterator(currentPlugin)
         .then(function(d) {
           return iterate()
         })
