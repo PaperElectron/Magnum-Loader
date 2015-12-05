@@ -1,0 +1,27 @@
+{
+  "name": "pomegranate-loader",
+  "version": "0.0.0",
+  "description": "Plugin loader for the pomegranate framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --recursive --ui bdd --reporter spec"
+  },
+  "keywords": [
+    "Pomegranate"
+  ],
+  "author": "Jim <monstertke@paperelectron.com> (http://paperelectron.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.0.5",
+    "chalk": "^1.1.1",
+    "lodash": "^3.10.1",
+    "magnum-di": "^1.0.1",
+    "parent-require": "^1.0.0"
+  },
+  "devDependencies": {
+    "magnum-di": "^1.0.0",
+    "mocha": "^2.3.3",
+    "mockery": "^1.4.0",
+    "should": "^7.1.1"
+  }
+}

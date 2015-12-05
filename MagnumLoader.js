@@ -158,106 +158,6 @@ function validatePlugin(plugin, package) {
   return _.merge(plugin, {meta: pluginMetaData});
 }
 
-function loadIterator(group) {
-  var toLoad = []
-  var groupPlugins = group.plugins
-  var index = groupPlugins.length - 1;
-
-  instance.Logger.log(instance.output['load'].announce(group.name));
-
-  while (index >= 0) {
-    var toResolve = (function(p) {
-      return function(resolve, reject){
-        return p.load(instance.injector.inject, function(err, toInject){
-
-          instance.Logger.log(instance.output['load'].individual(p.meta.name));
-
-          p.meta.loaded = true
-          resolve({meta: p.meta, returned: toInject})
-        })
-      }
-    })(groupPlugins[index]);
-
-    index -= 1;
-    toLoad.push(new Promise(toResolve))
-  }
-
-  return Promise.all(toLoad).then(function(loaded){
-    //load finished, need to sort by array vs object, load into injector and check for conflicts.
-    var injectOrder = [];
-    _.each(loaded, function(p){
-      if(p.meta.inject && !_.isArray(p.returned)) {
-        // If the plugin declares a depencency name, give it precedence.
-        injectOrder.unshift(injectService(group.name, p.meta.humanName, p.meta.inject, p.returned))
-      }
-      else {
-        // If no dependency name declared, attempt to inject last.
-        injectOrder.push(injectArray(group.name, p.meta, p.returned))
-      }
-    });
-
-    return injectOrder
-  }).then(function(load) {
-    return _.map(load, function(l) {
-      return l()
-    })
-  })
-}
-
-function startIterator(group) {
-  var toStart = []
-  var groupPlugins = group.plugins;
-  var index = groupPlugins.length - 1
-
-  instance.Logger.log(instance.output['start'].announce(group.name));
-
-  while (index >= 0) {
-    var toResolve = (function(p) {
-      return function(resolve, reject){
-        return p.start(function(err){
-
-          instance.Logger.log(instance.output['start'].individual(p.meta.name));
-
-          p.meta.started = true;
-          resolve(p.meta)
-        })
-      }
-    })(groupPlugins[index]);
-
-    index -= 1;
-    toStart.push(new Promise(toResolve))
-  }
-  return Promise.all(toStart)
-}
-function stopIterator(group) {
-  var toStop = []
-  var groupPlugins = group.plugins;
-  var index = groupPlugins.length - 1
-
-  instance.Logger.log(instance.output['stop'].announce(group.name));
-
-  while (index >= 0) {
-    var toResolve = (function(p) {
-      return function(resolve, reject){
-        var timer = setTimeout(function(){
-          reject(new Error('Timeout exceeded attempting to stop ' + p.meta.name))
-        }, 2000)
-        return p.stop(function(err){
-          clearTimeout(timer);
-          instance.Logger.log(instance.output['stop'].individual(p.meta.name));
-
-          p.meta.stopped = true;
-          resolve(p.meta)
-        })
-      }
-    })(groupPlugins[index]);
-
-    index -= 1;
-    toStop.push(new Promise(toResolve))
-  }
-  return Promise.all(toStop)
-}
-
 var actions = {
   load: function(p) {
     return function(resolve, reject){
@@ -297,6 +197,74 @@ var actions = {
   }
 };
 
+function loadIterator(group) {
+  var toLoad = []
+  var groupPlugins = group.plugins
+  var index = groupPlugins.length - 1;
+
+  instance.Logger.log(instance.output['load'].announce(group.name));
+
+  while (index >= 0) {
+    var toResolve = actions.load(groupPlugins[index]);
+
+    index -= 1;
+    toLoad.push(new Promise(toResolve))
+  }
+
+  return Promise.all(toLoad).then(function(loaded){
+    //load finished, need to sort by array vs object, load into injector and check for conflicts.
+    var injectOrder = [];
+    _.each(loaded, function(p){
+      if(p.meta.inject && !_.isArray(p.returned)) {
+        // If the plugin declares a depencency name, give it precedence.
+        injectOrder.unshift(injectService(group.name, p.meta.humanName, p.meta.inject, p.returned))
+      }
+      else {
+        // If no dependency name declared, attempt to inject last.
+        injectOrder.push(injectArray(group.name, p.meta, p.returned))
+      }
+    });
+
+    return injectOrder
+  }).then(function(load) {
+    return _.map(load, function(l) {
+      return l()
+    })
+  })
+}
+
+function startIterator(group) {
+  var toStart = []
+  var groupPlugins = group.plugins;
+  var index = groupPlugins.length - 1
+
+  instance.Logger.log(instance.output['start'].announce(group.name));
+
+  while (index >= 0) {
+    var toResolve = actions.start(groupPlugins[index]);
+
+    index -= 1;
+    toStart.push(new Promise(toResolve))
+  }
+  return Promise.all(toStart)
+}
+function stopIterator(group) {
+  var toStop = []
+  var groupPlugins = group.plugins;
+  var index = groupPlugins.length - 1
+
+  instance.Logger.log(instance.output['stop'].announce(group.name));
+
+  while (index >= 0) {
+    var toResolve = actions.stop(groupPlugins[index]);
+
+    index -= 1;
+    toStop.push(new Promise(toResolve))
+  }
+  return Promise.all(toStop)
+}
+
+
 function iterators(group, action){
   var toIterate = [];
   var groupPlugins = group.plugins;
@@ -319,30 +287,32 @@ function iterators(group, action){
   return Promise.all(toIterate)
 }
 
+
+// Iterate over grouped plugins passing them to the appropriate iterator.
 function iteratePlugins(iterator) {
   var plugins = instance.groupedPlugins
   //Load core, dependency and platform plugins, in that order.
   var p = {name: 'Platform', plugins: plugins['platform']};
   var d = {name: 'Dependency', plugins: plugins['dependency']};
   var c = {name: 'Core', plugins: plugins['core']};
-  var pluginArr = _.filter([p, d, c], function(v) {
+  var groupArr = _.filter([p, d, c], function(v) {
     return v.plugins
   })
 
-  var index = pluginArr.length - 1;
-  function iterate(){
-    var currentPlugin = pluginArr[index]
+  var index = groupArr.length - 1;
+  function nextGroup(){
+    var currentGroup = groupArr[index]
     index -= 1;
-    if(currentPlugin) {
-      return iterator(currentPlugin)
+    if(currentGroup) {
+      return iterator(currentGroup)
         .then(function(d) {
-          return iterate()
+          return nextGroup()
         })
     }
-    return pluginArr
+    return groupArr
   }
 
-  return iterate()
+  return nextGroup()
 }
 
 function injectService(groupName, humanName, dependencyName, dependencyObj) {
