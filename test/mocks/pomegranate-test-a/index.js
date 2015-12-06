@@ -21,6 +21,5 @@ module.exports = {
     done(null)
   },
   stop: function() {
-
   }
 };

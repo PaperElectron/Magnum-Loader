@@ -19,6 +19,9 @@ var instance = null;
 function MagnumLoader(injector, pkgjson, options) {
   Events.call(this)
   this.options = options || {};
+  this.loadPrefix = options.prefix || (function(){throw new Error('No Load Prefix set.')})()
+  this.layers = options.layers || (function(){throw new Error('No Load Layers set.')})()
+  this.pluginOptions = options.pluginOptions || {};
   this.Logger = this.options.logger || console;
   this.output = require('./lib/Outputs')(this.options.output);
   this.states = {
@@ -31,7 +34,7 @@ function MagnumLoader(injector, pkgjson, options) {
   instance = this;
 
   var pomegranatePlugins = _.filter(this.dependencies, function(dep) {
-    if(dep.indexOf('pomegranate-') === 0) return dep
+    if(dep.indexOf(instance.loadPrefix + '-') === 0) return dep
   })
 
   // Iterate over prefixed modules, load them and their metadata.
@@ -112,6 +115,11 @@ MagnumLoader.prototype.stop = function() {
       self.emit('stop')
     })
 };
+/**
+ * Returns all loaded plugins, optionally by group.
+ * @param group Groupname to return
+ * @returns {Object} Plugins
+ */
 MagnumLoader.prototype.getLoaded = function(group) {
   if(group) {
     return this.groupedPlugins[group]
@@ -140,8 +148,9 @@ function validatePlugin(plugin, package) {
   }
 
   pluginMetaData.name = package.name
-  pluginMetaData.humanName = package.name.split('pomegranate-')[1];
+  pluginMetaData.humanName = package.name.split('pomegranate-')[1].replace('-', '_');
   pluginMetaData.loaded = false
+  plugin.options = instance.pluginOptions[pluginMetaData.humanName] || {};
 
   var methods = ['load', 'start', 'stop'];
   var lpValid = _.chain(methods)
@@ -157,12 +166,16 @@ function validatePlugin(plugin, package) {
   return _.merge(plugin, {meta: pluginMetaData});
 }
 
+/**
+ * Functions passed to plugins for deferred execution.
+ * @type {{load: Function, start: Function, stop: Function}}
+ */
 var preActions = {
   load: function(p) {
     return function(resolve, reject){
       return p.load(instance.injector.inject, function(err, toInject){
 
-        instance.Logger.log(instance.output['load'].individual(p.meta.name));
+        instance.Logger.log(instance.output['load'].individual(p.meta.humanName));
 
         p.meta.loaded = true
         resolve({meta: p.meta, returned: toInject})
@@ -173,7 +186,7 @@ var preActions = {
     return function(resolve, reject){
       return p.start(function(err){
 
-        instance.Logger.log(instance.output['start'].individual(p.meta.name));
+        instance.Logger.log(instance.output['start'].individual(p.meta.humanName));
 
         p.meta.started = true;
         resolve({meta: p.meta})
@@ -183,11 +196,11 @@ var preActions = {
   stop: function(p) {
     return function(resolve, reject){
       var timer = setTimeout(function(){
-        reject(new Error('Timeout exceeded attempting to stop ' + p.meta.name))
+        reject(new Error('Timeout exceeded attempting to stop ' + p.meta.humanName))
       }, 2000)
       return p.stop(function(err){
         clearTimeout(timer);
-        instance.Logger.log(instance.output['stop'].individual(p.meta.name));
+        instance.Logger.log(instance.output['stop'].individual(p.meta.humanName));
 
         p.meta.stopped = true;
         resolve({meta: p.meta})
@@ -196,12 +209,18 @@ var preActions = {
   }
 };
 
+/**
+ * Functions ran on the object returned from the group iterator.
+ * @type {{load: Function, start: Function, stop: Function}}
+ */
 var postLoadActions = {
   load: function(result) {
     return new Promise(function(resolve, reject) {
       var injectOrder = [];
       _.each(result, function(p){
+
         var groupName = p.meta.type.charAt(0).toUpperCase() + p.meta.type.slice(1);
+
         if(p.meta.inject && !_.isArray(p.returned)) {
           // If the plugin declares a depencency name, give it precedence.
           injectOrder.unshift(injectService(groupName, p.meta.humanName, p.meta.inject, p.returned))
@@ -238,9 +257,7 @@ function iterators(group, action){
   instance.Logger.log(instance.output[action].announce(group.name))
 
   while (index >= 0){
-    var gp = groupPlugins[index]
-    gp.meta.groupName = group.name
-    var toResolve = preActions[action](gp)
+    var toResolve = preActions[action](groupPlugins[index])
     index -= 1;
     toIterate.push(new Promise(toResolve))
   }
@@ -252,13 +269,17 @@ function iterators(group, action){
 // Iterate over grouped plugins passing them to the appropriate iterator.
 function iteratePlugins(action) {
   var plugins = instance.groupedPlugins
-  //Load core, dependency and platform plugins, in that order.
-  var p = {name: 'Platform', plugins: plugins['platform']};
-  var d = {name: 'Dependency', plugins: plugins['dependency']};
-  var c = {name: 'Core', plugins: plugins['core']};
-  var groupArr = _.filter([p, d, c], function(v) {
+
+  // Create the layer object to load dependencies in order.
+  var layers = _.map(instance.layers.reverse(), function(layer){
+    var groupName = layer.charAt(0).toUpperCase() + layer.slice(1)
+    return {name: groupName, plugins: plugins[layer]}
+  });
+
+  // Remove any layers that don't contain plugins.
+  var groupArr = _.filter(layers, function(v) {
     return v.plugins
-  })
+  });
 
   var index = groupArr.length - 1;
   function nextGroup(){

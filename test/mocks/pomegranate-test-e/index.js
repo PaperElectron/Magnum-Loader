@@ -29,7 +29,6 @@ module.exports = {
   },
   stop: function(done) {
     setTimeout(function(){
-      console.log('stopping');
       done()
     }, 100)
   }

@@ -10,6 +10,24 @@ var injector = require('magnum-di');
 var mockery = require('mockery');
 var _ = require('lodash');
 
+var mockConsole = {
+  log: _.noop,
+  warn:_.noop,
+  error: _.noop
+}
+
+var pluginOptions = {
+  test_a: {
+    host: 'localhost',
+    port: 3006
+  }
+}
+var options = {
+  prefix: 'pomegranate',
+  layers: ['core', 'dependency', 'platform'],
+  logger: mockConsole,
+  pluginOptions: pluginOptions
+}
 
 describe('It loads plugins and injects dependencies', function(){
   var loader;
@@ -41,7 +59,7 @@ describe('It loads plugins and injects dependencies', function(){
           "pomegranate-test-c": "0.0.0",
           "pomegranate-test-d": "0.0.0",
           "pomegranate-test-e": "0.0.0"
-        }})
+        }}, options)
 
       loader.on('ready', done)
 
