@@ -52,7 +52,7 @@ describe('It loads plugins and injects dependencies', function(){
   describe('Initializing', function(){
 
     it('Should initialize.', function(done) {
-      loader = require('../MagnumLoader')(injector, {
+      loader = require('../index')(injector, {
         "dependencies": {
           "pomegranate-test-a": "0.0.0",
           "pomegranate-test-b": "0.0.0",

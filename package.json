@@ -13,6 +13,11 @@
   ],
   "author": "Jim <monstertke@paperelectron.com> (http://paperelectron.com/)",
   "license": "MIT",
+  "files": [
+    "index.js",
+    "lib/",
+    "Readme.md"
+  ],
   "dependencies": {
     "bluebird": "^3.0.5",
     "chalk": "^1.1.1",
@@ -24,5 +29,16 @@
     "mocha": "^2.3.3",
     "mockery": "^1.4.0",
     "should": "^7.1.1"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaperElectron/Magnum-Loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PaperElectron/Magnum-Loader/issues"
+  },
+  "homepage": "https://github.com/PaperElectron/Magnum-Loader"
 }
