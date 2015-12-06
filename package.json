@@ -1,13 +1,15 @@
 {
-  "name": "pomegranate-loader",
+  "name": "magnum-loader",
   "version": "0.0.0",
-  "description": "Plugin loader for the pomegranate framework",
+  "description": "Plugin loader for the Magnum DI dependency injection framework.",
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --recursive --ui bdd --reporter spec"
   },
   "keywords": [
-    "Pomegranate"
+    "Dependency Injection",
+    "IOC",
+    "Framework"
   ],
   "author": "Jim <monstertke@paperelectron.com> (http://paperelectron.com/)",
   "license": "MIT",
@@ -19,7 +21,6 @@
     "parent-require": "^1.0.0"
   },
   "devDependencies": {
-    "magnum-di": "^1.0.0",
     "mocha": "^2.3.3",
     "mockery": "^1.4.0",
     "should": "^7.1.1"
