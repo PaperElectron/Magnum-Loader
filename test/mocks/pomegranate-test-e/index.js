@@ -25,12 +25,12 @@ module.exports = {
   start: function(done) {
     setTimeout(function(){
       done(null)
-    }, 1000)
+    }, 100)
   },
   stop: function(done) {
     setTimeout(function(){
       console.log('stopping');
       done()
-    }, 1000)
+    }, 100)
   }
 };
