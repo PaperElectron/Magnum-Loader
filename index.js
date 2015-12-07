@@ -167,6 +167,7 @@ function validatePlugin(plugin, package) {
   pluginMetaData.humanName = package.name.split('pomegranate-')[1].replace('-', '_');
   pluginMetaData.loaded = false
   plugin.options = instance.pluginOptions[pluginMetaData.humanName] || {};
+  plugin.Logger = instance.Logger;
 
   var methods = ['load', 'start', 'stop'];
   var lpValid = _.chain(methods)
