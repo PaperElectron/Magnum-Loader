@@ -6,6 +6,7 @@
  */
 
 var _ = require('lodash');
+
 var Promise = require('bluebird');
 var Events = require('events').EventEmitter;
 var util = require('util');
@@ -16,7 +17,7 @@ var instance = null;
  *
  * @module magnum-loader
  */
-function MagnumLoader(injector, pkgjson, options) {
+function MagnumLoader(pkgjson, options) {
   Events.call(this)
   this.options = options || {};
   this.loadPrefix = options.prefix || (function(){throw new Error('No Load Prefix set.')})()
@@ -30,7 +31,7 @@ function MagnumLoader(injector, pkgjson, options) {
     stop: false
   };
   this.dependencies = _.keys(pkgjson.dependencies);
-  this.injector = injector;
+  this.injector = require('magnum-di');
   instance = this;
 
   var pomegranatePlugins = _.filter(this.dependencies, function(dep) {
@@ -64,6 +65,14 @@ function MagnumLoader(injector, pkgjson, options) {
 }
 
 util.inherits(MagnumLoader, Events)
+
+/**
+ * Returns a reference to the Magnum DI injector object.
+ * @returns {Object} Magnum DI
+ */
+MagnumLoader.prototype.getInjector = function(){
+  return this.injector
+}
 
 /**
  *  Calls the load function of all loaded plugins, eventually adding the objects

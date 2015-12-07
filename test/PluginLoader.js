@@ -6,7 +6,6 @@
  */
 
 var should = require('should');
-var injector = require('magnum-di');
 var mockery = require('mockery');
 var _ = require('lodash');
 
@@ -31,6 +30,7 @@ var options = {
 
 describe('It loads plugins and injects dependencies', function(){
   var loader;
+  var injector;
   before(function(){
     mockery.enable()
     mockery.warnOnUnregistered(false);
@@ -52,7 +52,7 @@ describe('It loads plugins and injects dependencies', function(){
   describe('Initializing', function(){
 
     it('Should initialize.', function(done) {
-      loader = require('../index')(injector, {
+      loader = require('../index')({
         "dependencies": {
           "pomegranate-test-a": "0.0.0",
           "pomegranate-test-b": "0.0.0",
@@ -63,10 +63,10 @@ describe('It loads plugins and injects dependencies', function(){
 
       loader.on('ready', done)
 
-
     });
 
     it('Should load', function(done) {
+      injector = loader.getInjector()
       loader.on('load', done)
       loader.load()
     });
