@@ -13,7 +13,9 @@
 module.exports = {
   load: function(inject, loaded) {
     setTimeout(function() {
-      loaded(null, {name: "test-a"})
+      loaded(null, function(){
+        return {name: 'test-a', random: Math.random()}
+      })
     }, 100)
 
   },

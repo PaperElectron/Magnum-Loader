@@ -250,7 +250,8 @@ var postLoadActions = {
 
         if(p.meta.inject && !_.isArray(p.returned)) {
           // If the plugin declares a depencency name, give it precedence.
-          injectOrder.unshift(injectService(groupName, p.meta.humanName, p.meta.inject, p.returned))
+          var loadTarget = {name: p.meta.inject, load: p.returned, factory: p.meta.factory || false};
+          injectOrder.unshift(injectService(groupName, p.meta, loadTarget))
         }
         else {
           // If no dependency name declared, attempt to inject last.
@@ -327,23 +328,30 @@ function iteratePlugins(action) {
   return nextGroup()
 }
 
-function injectService(groupName, humanName, dependencyName, dependencyObj) {
+function injectService(groupName, metaData, loadTarget) {
   return function() {
     var retry = 2;
-    var finalName = dependencyName;
+    var finalName = loadTarget.name;
+    var targetObject = loadTarget.load;
+
     var tryInject = function(depName) {
       if(!retry) return false
       try {
-        instance.injector.service(depName, dependencyObj)
+        if(loadTarget.factory){
+          instance.injector.factory(depName, targetObject)
+        } else {
+          instance.injector.service(depName, targetObject)
+        }
+
         return true
       }
       catch (e) {
         if(retry) {
-          instance.Logger.error(instance.output.conflictingName(humanName, depName));
+          instance.Logger.error(instance.output.conflictingName(metaData.humanName, depName));
         }
         retry -= 1;
         //TODO: Make this run twice only.
-        finalName = humanName.replace('-', '_') + '_' + dependencyName;
+        finalName = metaData.humanName.replace('-', '_') + '_' + loadTarget.name;
 
         instance.Logger.error(instance.output.fixConflict(finalName));
         return tryInject(finalName)
@@ -352,7 +360,7 @@ function injectService(groupName, humanName, dependencyName, dependencyObj) {
 
     var result = tryInject(finalName)
 
-    instance.Logger.log(instance.output.injectedDep(groupName,humanName,finalName));
+    instance.Logger.log(instance.output.injectedDep(groupName,metaData.humanName,finalName));
     return result;
   }
 }
@@ -363,7 +371,7 @@ function injectArray(groupName, meta, dependencyObjs) {
       var isObj = _.isObject(d.load)
       var isString = _.isString(d.name)
       if(isObj && isString) {
-        injectService(groupName, meta.humanName, d.name, d.load)()
+        injectService(groupName, meta, d)()
       }
     })
   }

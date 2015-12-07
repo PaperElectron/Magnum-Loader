@@ -13,10 +13,10 @@
 module.exports = {
   load: function(inject, loaded) {
     setTimeout(function() {
-      var C = {name: 'C', load: {name: 'test-c', obj: 'C'}}
-      var D = {name: 'D', load: {name: 'test-c', obj: 'D'}}
-      var E = {name: 'E', load: {name: 'test-c', obj: 'E'}}
-      var A = {name: 'A', load: {name: 'test-c', obj: 'A'}}
+      var C = {name: 'C', factory: true, load: function(){return {name: 'test-c', obj: 'C'}}};
+      var D = {name: 'D', load: {name: 'test-c', obj: 'D'}};
+      var E = {name: 'E', load: {name: 'test-c', obj: 'E'}};
+      var A = {name: 'A', load: {name: 'test-c', obj: 'A'}};
 
       loaded(null, [C,D,E,A])
     }, 100)

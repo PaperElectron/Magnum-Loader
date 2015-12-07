@@ -110,10 +110,18 @@ describe('It loads plugins and injects dependencies', function(){
 
   })
 
-  describe('Adding returned objects to the DI framework', function() {
-    it('Should add dependency A', function() {
+  describe('Adding factories to the DI framework', function(){
+    it('Should add dependency factory A', function() {
       injector.get('A').name.should.equal('test-a')
     });
+    it('Should return distinct objects when called', function() {
+      var a = injector.get('A');
+      var b = injector.get('A');
+      a.random.should.not.equal(b.random);
+    });
+  })
+
+  describe('Adding objects to the DI framework', function() {
     it('Should add dependency B', function() {
       injector.get('B').name.should.equal('test-b')
     });
@@ -123,6 +131,8 @@ describe('It loads plugins and injects dependencies', function(){
       conflict.name.should.equal('test-c')
     });
   })
+
+
 
   describe('Starting plugins', function(){
     it('Should start all registered and injected plugins.', function(done) {
@@ -135,7 +145,7 @@ describe('It loads plugins and injects dependencies', function(){
     this.timeout(3000)
     it('Should stop all registered and injected plugins. Catch errors on timeouts.', function(done) {
       loader.on('error', function(err){
-        console.log(err);
+        err.message.should.equal('Timeout exceeded (2000ms) attempting to stop test_a')
       })
       loader.on('stop', done)
       loader.stop()
