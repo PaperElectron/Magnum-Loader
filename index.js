@@ -20,9 +20,10 @@ var instance = null;
 function MagnumLoader(pkgjson, options) {
   Events.call(this)
   this.options = options || {};
-  this.loadPrefix = options.prefix || (function(){throw new Error('No Load Prefix set.')})()
-  this.layers = options.layers || (function(){throw new Error('No Load Layers set.')})()
+  this.loadPrefix = options.prefix || (function(){throw new Error('No Load Prefix set.')})();
+  this.layers = options.layers || (function(){throw new Error('No Load Layers set.')})();
   this.pluginOptions = options.pluginOptions || {};
+  this.timeout = options.timeout || 2000;
   this.Logger = this.options.logger || console;
   this.output = require('./lib/Outputs')(this.options.output);
   this.states = {
@@ -88,6 +89,9 @@ MagnumLoader.prototype.load = function() {
     .then(function(result) {
       self.emit('load')
     })
+    .catch(function(err){
+      self.emit('error', err)
+    })
 };
 
 /**
@@ -102,6 +106,9 @@ MagnumLoader.prototype.start = function() {
   iteratePlugins('start')
     .then(function(result) {
       self.emit('start')
+    })
+    .catch(function(err){
+      self.emit('error', err)
     })
 };
 
@@ -182,7 +189,12 @@ function validatePlugin(plugin, package) {
 var preActions = {
   load: function(p) {
     return function(resolve, reject){
+      var timer = setTimeout(function(){
+        reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to load ' + p.meta.humanName))
+      }, instance.timeout)
+
       return p.load(instance.injector.inject, function(err, toInject){
+        clearTimeout(timer);
 
         instance.Logger.log(instance.output['load'].individual(p.meta.humanName));
 
@@ -193,8 +205,12 @@ var preActions = {
   },
   start: function(p) {
     return function(resolve, reject){
-      return p.start(function(err){
+      var timer = setTimeout(function(){
+        reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to start ' + p.meta.humanName))
+      }, instance.timeout)
 
+      return p.start(function(err){
+        clearTimeout(timer);
         instance.Logger.log(instance.output['start'].individual(p.meta.humanName));
 
         p.meta.started = true;
@@ -205,8 +221,9 @@ var preActions = {
   stop: function(p) {
     return function(resolve, reject){
       var timer = setTimeout(function(){
-        reject(new Error('Timeout exceeded attempting to stop ' + p.meta.humanName))
-      }, 2000)
+        reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to stop ' + p.meta.humanName))
+      }, instance.timeout)
+
       return p.stop(function(err){
         clearTimeout(timer);
         instance.Logger.log(instance.output['stop'].individual(p.meta.humanName));
