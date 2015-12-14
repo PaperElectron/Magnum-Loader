@@ -5,12 +5,16 @@
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
+'use strict';
+
 var _ = require('lodash');
 
 var Promise = require('bluebird');
 var Events = require('events').EventEmitter;
 var util = require('util');
-
+var fs = Promise.promisifyAll(require('fs'));
+var path = require('path');
+var Errors = require('./lib/Errors');
 var instance = null;
 
 /**
@@ -20,12 +24,14 @@ var instance = null;
 function MagnumLoader(pkgjson, options) {
   Events.call(this)
   this.options = options || {};
-  this.loadPrefix = options.prefix || (function(){throw new Error('No Load Prefix set.')})();
-  this.layers = options.layers || (function(){throw new Error('No Load Layers set.')})();
+  this.loadPrefix = options.prefix || (function(){throw new Errors.OptionsError('options.prefix not set')})();
+  this.layers = options.layers || (function(){throw new Errors.OptionsError('options.layers not set!')})();
+  this.additionalPluginDirectory = options.pluginDirectory || false
   this.pluginOptions = options.pluginOptions || {};
   this.timeout = options.timeout || 2000;
   this.Logger = this.options.logger || console;
   this.output = require('./lib/Outputs')(this.options.output);
+  this.loadErrors = []
   this.states = {
     load: false,
     start: false,
@@ -33,32 +39,62 @@ function MagnumLoader(pkgjson, options) {
   };
   this.dependencies = _.keys(pkgjson.dependencies);
   this.injector = require('magnum-di');
+
+  /*
+   * Add the custom errors object right off the bat.
+   * So we have access to merge plugins custom errors into it.
+   */
+  this.injector.service('Errors', Errors)
   instance = this;
 
-  var pomegranatePlugins = _.filter(this.dependencies, function(dep) {
-    if(dep.indexOf(instance.loadPrefix + '-') === 0) return dep
-  })
+  var mergedPlugins;
+  var internalPlugins = [];
+  var externalPlugins = _.chain(this.dependencies)
+    .filter(function(dep) {
+      if(dep.indexOf(instance.loadPrefix + '-') === 0) return dep
+    })
+    .map(function(dep){
+      return {require: dep, external: true}
+    })
+    .value()
+
+  // If plugin path is defined, get ready to load those as well.
+  if(this.additionalPluginDirectory){
+    internalPlugins = _.map(fs.readdirSync(this.additionalPluginDirectory), function(file){
+      return {require: path.join(instance.additionalPluginDirectory, file), external: false, filename: file};
+    })
+  }
+
+  // Merge our plugins from node_modules and the plugins from the user specified plugin directory.
+  mergedPlugins = externalPlugins.concat(internalPlugins)
 
   // Iterate over prefixed modules, load them and their metadata.
-  this.groupedPlugins = _.chain(pomegranatePlugins)
+  this.groupedPlugins = _.chain(mergedPlugins)
     .map(function(plugin) {
-      var validPlugin;
+      var pluginName = plugin.require
       /*
        * Attempt to load from parent, if this is a linked module use the workaround.
        */
       try {
-        var loadedPlugin = require(plugin)
-        var pluginPackage = require(plugin + '/package')
+        var loadedPlugin = require(plugin.require)
       }
       catch (e) {
         var prequire = require('parent-require');
-        loadedPlugin = prequire(plugin)
-        pluginPackage = prequire(plugin + '/package')
+        loadedPlugin = prequire(plugin.require)
       }
 
-      return validatePlugin(loadedPlugin, pluginPackage);
+      plugin.loaded = loadedPlugin;
+      if(_.isArray(plugin.loaded)){
+        return _.map(plugin.loaded, function(mPlugin){
+          var multiplePluginin = _.chain(plugin).clone().omit('loaded').value()
+          multiplePluginin.loaded = mPlugin
+          return validatePlugin(multiplePluginin)
+        })
+      }
+      return validatePlugin(plugin);
 
-    }).filter(Boolean).groupBy('meta.type').value();
+    }).flatten().filter(Boolean).groupBy('meta.layer').value();
+
 
   setImmediate(function() {
     instance.emit('ready')
@@ -66,6 +102,17 @@ function MagnumLoader(pkgjson, options) {
 }
 
 util.inherits(MagnumLoader, Events)
+
+MagnumLoader.prototype.addPlugin = function(plugin){
+  if(this.states.load) {
+    throw new Error('Cannot add plugins after load has been called.')
+  }
+  var validate = validatePlugin(plugin.plugin, plugin.meta)
+  if(!instance.groupedPlugins[validate.meta.layer]){
+    instance.groupedPlugins[validate.meta.layer] = []
+  }
+  instance.groupedPlugins[validate.meta.layer].push(validate)
+}
 
 /**
  * Returns a reference to the Magnum DI injector object.
@@ -88,6 +135,7 @@ MagnumLoader.prototype.load = function() {
   iteratePlugins('load')
     .then(function(result) {
       self.emit('load')
+      return null
     })
     .catch(function(err){
       self.emit('error', err)
@@ -105,7 +153,11 @@ MagnumLoader.prototype.start = function() {
   this.states.start = true;
   iteratePlugins('start')
     .then(function(result) {
+      if(instance.loadErrors.length > 0){
+        outputAccumulatedErrors()
+      }
       self.emit('start')
+      return null
     })
     .catch(function(err){
       self.emit('error', err)
@@ -125,6 +177,7 @@ MagnumLoader.prototype.stop = function() {
   iteratePlugins('stop')
     .then(function(result) {
       self.emit('stop')
+      return null
     })
     .catch(function(err){
       self.emit('error', err)
@@ -155,24 +208,41 @@ module.exports = function(injector, pkgjson, options) {
  * @param package The Plugins package.json file to extract metadata.
  * @returns {boolean|Object}
  */
-function validatePlugin(plugin, package) {
-  var pluginMetaData = package.pomegranate
+function validatePlugin(plugin) {
 
+  var pluginName = plugin.filename || plugin.require;
+  var pluginMetaData = plugin.loaded.metadata
   if(!pluginMetaData) {
-    instance.Logger.warn('Plugin: ' + package.name + ' missing metadata and cannot load.')
+    var error = instance.output.missingMetadata(pluginName);
+    instance.loadErrors.push(error)
+    instance.Logger.warn(error)
     return false
   }
+  pluginMetaData.requireName = pluginName;
+  pluginMetaData.external = plugin.external;
 
-  pluginMetaData.name = package.name
-  pluginMetaData.humanName = package.name.split('pomegranate-')[1].replace('-', '_');
+  if(!plugin.external){
+    if(!plugin.loaded.metadata.name) {
+      var error = instance.output.missingName(plugin.filename);
+      instance.loadErrors.push(error);
+      instance.Logger.error(error);
+      return false
+    }
+    pluginName = plugin.loaded.metadata.name
+  }
+
+  pluginMetaData.name = pluginName
+  pluginMetaData.humanName = pluginName.substr(pluginName.indexOf('-') + 1).replace('-', '_');
+
   pluginMetaData.loaded = false
-  plugin.options = instance.pluginOptions[pluginMetaData.humanName] || {};
-  plugin.Logger = instance.Logger;
+  plugin.loaded.plugin.options = instance.pluginOptions[pluginMetaData.humanName] || {};
+  plugin.loaded.plugin.Logger = instance.Logger;
+  plugin.loaded.plugin.Chalk = require('chalk');
 
   var methods = ['load', 'start', 'stop'];
   var lpValid = _.chain(methods)
     .map(function(v) {
-      return _.isFunction(plugin[v])
+      return _.isFunction(plugin.loaded.plugin[v])
     })
     .every(Boolean)
     .value()
@@ -180,7 +250,10 @@ function validatePlugin(plugin, package) {
     instance.Logger.error(instance.output.invalidPlugin(pluginMetaData.humanName))
     return false
   }
-  return _.merge(plugin, {meta: pluginMetaData});
+  if(plugin.loaded.errors){
+    mergeAttachedErrors(plugin.loaded.errors);
+  }
+  return _.merge(plugin.loaded.plugin, {meta: pluginMetaData});
 }
 
 /**
@@ -189,50 +262,61 @@ function validatePlugin(plugin, package) {
  */
 var preActions = {
   load: function(p) {
-    return function(resolve, reject){
+    return new Promise(function(resolve, reject){
+
       var timer = setTimeout(function(){
         reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to load ' + p.meta.humanName))
       }, instance.timeout)
 
       return p.load(instance.injector.inject, function(err, toInject){
         clearTimeout(timer);
-
+        if(err){
+          return reject(err)
+        }
         instance.Logger.log(instance.output['load'].individual(p.meta.humanName));
 
         p.meta.loaded = true
         resolve({meta: p.meta, returned: toInject})
       })
-    }
+    })
   },
   start: function(p) {
-    return function(resolve, reject){
+    return new Promise(function(resolve, reject){
+
       var timer = setTimeout(function(){
         reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to start ' + p.meta.humanName))
       }, instance.timeout)
 
       return p.start(function(err){
         clearTimeout(timer);
+        if(err){
+          return reject(err)
+        }
         instance.Logger.log(instance.output['start'].individual(p.meta.humanName));
 
         p.meta.started = true;
         resolve({meta: p.meta})
       })
-    }
+    })
   },
   stop: function(p) {
-    return function(resolve, reject){
+    return new Promise(function(resolve, reject){
+
       var timer = setTimeout(function(){
         reject(new Error('Timeout exceeded ('+ instance.timeout +'ms) attempting to stop ' + p.meta.humanName))
       }, instance.timeout)
 
       return p.stop(function(err){
         clearTimeout(timer);
+        if(err){
+          return reject(err)
+        }
         instance.Logger.log(instance.output['stop'].individual(p.meta.humanName));
 
         p.meta.stopped = true;
         resolve({meta: p.meta})
       })
-    }
+    })
   }
 };
 
@@ -244,9 +328,15 @@ var postLoadActions = {
   load: function(result) {
     return new Promise(function(resolve, reject) {
       var injectOrder = [];
+
+      /*
+       * We want to give name precedence to plugins that declare a name over ones that
+       * simply return an array of objects to be added to the injector, so order them here.
+       */
+
       _.each(result, function(p){
 
-        var groupName = p.meta.type.charAt(0).toUpperCase() + p.meta.type.slice(1);
+        var groupName = p.meta.layer.charAt(0).toUpperCase() + p.meta.layer.slice(1);
 
         if(p.meta.inject && !_.isArray(p.returned)) {
           // If the plugin declares a depencency name, give it precedence.
@@ -265,7 +355,7 @@ var postLoadActions = {
       resolve(injectOrder)
     });
   },
-  start: function() {
+  start: function(result) {
     return new Promise(function(resolve, reject) {
       resolve({ok: 1})
     });
@@ -278,17 +368,14 @@ var postLoadActions = {
 }
 
 function iterators(group, action){
-  var toIterate = [];
   var groupPlugins = group.plugins;
-  var index = groupPlugins.length - 1;
 
   instance.Logger.log(instance.output[action].announce(group.name))
-
-  while (index >= 0){
-    var toResolve = preActions[action](groupPlugins[index])
-    index -= 1;
-    toIterate.push(new Promise(toResolve))
-  }
+  var toIterate = _.map(groupPlugins, function(p){
+    return preActions[action](p).then(function(t) {
+      return t
+    })
+  })
 
   return Promise.all(toIterate)
 }
@@ -298,8 +385,15 @@ function iterators(group, action){
 function iteratePlugins(action) {
   var plugins = instance.groupedPlugins
 
-  // Create the layer object to load dependencies in order.
-  var layers = _.map(instance.layers.reverse(), function(layer){
+  // Create the layer array to load dependencies in order.
+  var orderedLayers
+  if(action === 'stop'){
+    // If we are stopping the platform run in reverse order.
+    orderedLayers = instance.layers
+  } else {
+    orderedLayers = instance.layers.slice().reverse()
+  }
+  var layers = _.map(orderedLayers, function(layer){
     var groupName = layer.charAt(0).toUpperCase() + layer.slice(1)
     return {name: groupName, plugins: plugins[layer]}
   });
@@ -346,6 +440,7 @@ function injectService(groupName, metaData, loadTarget) {
         return true
       }
       catch (e) {
+        console.log(e);
         if(retry) {
           instance.Logger.error(instance.output.conflictingName(metaData.humanName, depName));
         }
@@ -375,4 +470,21 @@ function injectArray(groupName, meta, dependencyObjs) {
       }
     })
   }
+}
+
+function mergeAttachedErrors(errors){
+  var e = _.pick(errors, function(err){
+    return (err.prototype && err.prototype.name === 'Error')
+  });
+
+  instance.injector.merge('Errors', e)
+}
+
+function outputAccumulatedErrors(){
+  var plural = instance.loadErrors.length === 1 ? ' error.' : ' errors.'
+  var titleMsg = 'Start finished with ' + instance.loadErrors.length + plural;
+  instance.Logger.error(instance.output.errorTitle(titleMsg))
+  _.each(instance.loadErrors, function(err){
+    instance.Logger.error(err)
+  })
 }

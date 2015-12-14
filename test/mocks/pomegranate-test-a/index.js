@@ -4,13 +4,19 @@
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
-
+var Promise = require('bluebird');
 /**
  *
  * @module index
  */
 
-module.exports = {
+exports.metadata = {
+  "layer": "core",
+  "inject": "A",
+  "factory": true
+}
+
+exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
       loaded(null, function(){
@@ -20,7 +26,9 @@ module.exports = {
 
   },
   start: function(done) {
-    done(null)
+    return new Promise(function(resolve, reject){
+      resolve(done(null))
+    })
   },
   stop: function() {
   }

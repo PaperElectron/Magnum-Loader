@@ -8,6 +8,7 @@
 var should = require('should');
 var mockery = require('mockery');
 var _ = require('lodash');
+var path = require('path');
 
 var mockConsole = {
   log: _.noop,
@@ -23,8 +24,9 @@ var pluginOptions = {
 }
 var options = {
   prefix: 'pomegranate',
-  layers: ['core', 'dependency', 'platform'],
+  layers: ['core', 'data', 'dependency', 'platform'],
   logger: mockConsole,
+  pluginDirectory: path.join(__dirname, '/plugins'),
   pluginOptions: pluginOptions
 }
 
@@ -34,16 +36,14 @@ describe('It loads plugins and injects dependencies', function(){
   before(function(){
     mockery.enable()
     mockery.warnOnUnregistered(false);
+
     mockery.registerSubstitute('pomegranate-test-a', './mocks/pomegranate-test-a');
     mockery.registerSubstitute('pomegranate-test-b', './mocks/pomegranate-test-b');
     mockery.registerSubstitute('pomegranate-test-c', './mocks/pomegranate-test-c');
     mockery.registerSubstitute('pomegranate-test-d', './mocks/pomegranate-test-d');
     mockery.registerSubstitute('pomegranate-test-e', './mocks/pomegranate-test-e');
-    mockery.registerSubstitute('pomegranate-test-a/package', './mocks/pomegranate-test-a/package');
-    mockery.registerSubstitute('pomegranate-test-b/package', './mocks/pomegranate-test-b/package');
-    mockery.registerSubstitute('pomegranate-test-c/package', './mocks/pomegranate-test-c/package');
-    mockery.registerSubstitute('pomegranate-test-d/package', './mocks/pomegranate-test-d/package');
-    mockery.registerSubstitute('pomegranate-test-e/package', './mocks/pomegranate-test-e/package');
+    mockery.registerSubstitute('pomegranate-test-f', './mocks/pomegranate-test-f');
+
   })
 
   after(function(){
@@ -58,11 +58,11 @@ describe('It loads plugins and injects dependencies', function(){
           "pomegranate-test-b": "0.0.0",
           "pomegranate-test-c": "0.0.0",
           "pomegranate-test-d": "0.0.0",
-          "pomegranate-test-e": "0.0.0"
+          "pomegranate-test-e": "0.0.0",
+          "pomegranate-test-f": "0.0.0"
         }}, options)
 
       loader.on('ready', done)
-
     });
 
     it('Should load', function(done) {
@@ -80,10 +80,10 @@ describe('It loads plugins and injects dependencies', function(){
   })
 
   describe('Loading Plugins', function() {
-    it('Core Should have 2 loaded plugins after initialization', function() {
+    it('Core Should have 5 loaded plugins after initialization', function() {
       var core = loader.getLoaded('core')
       core.should.be.an.Array()
-      core.length.should.equal(2)
+      core.length.should.equal(5)
     });
     it('Dependencies Should have 1 loaded plugin after initialization', function() {
       var dependency = loader.getLoaded('dependency')
@@ -145,12 +145,20 @@ describe('It loads plugins and injects dependencies', function(){
     this.timeout(3000)
     it('Should stop all registered and injected plugins. Catch errors on timeouts.', function(done) {
       loader.on('error', function(err){
-        err.message.should.equal('Timeout exceeded (2000ms) attempting to stop test_a')
+        err.message.should.equal('Timeout exceeded (2000ms) attempting to stop test_c')
       })
       loader.on('stop', done)
       loader.stop()
     });
   })
 
+  describe('Injector should hold the custom errors object', function() {
+    it('Should have OptionsError and HooktimeoutError, as well as a plugin defined TestError', function() {
+      var errors = injector.get('Errors');
+      errors.should.have.property('TestError');
+      errors.should.have.property('OptionsError');
+      errors.should.have.property('HookTimeoutError');
+    });
+  })
 
 })

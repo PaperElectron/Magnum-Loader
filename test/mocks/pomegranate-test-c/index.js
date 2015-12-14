@@ -10,7 +10,11 @@
  * @module index
  */
 
-module.exports = {
+exports.metadata = {
+  "layer": "platform"
+}
+
+exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
       var C = {name: 'C', factory: true, load: function(){return {name: 'test-c', obj: 'C'}}};

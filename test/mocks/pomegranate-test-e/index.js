@@ -10,7 +10,11 @@
  * @module index
  */
 
-module.exports = {
+exports.metadata = {
+  "layer": "core"
+}
+
+exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
       var W = {name: 'W', load: {name: 'dependency-d', obj: 'W'}}
