@@ -16,7 +16,8 @@ var fs = Promise.promisifyAll(require('fs'));
 var path = require('path');
 var Errors = require('./lib/Errors');
 var instance = null;
-
+var preActions;
+var postLoadActions;
 /**
  *
  * @module magnum-loader
@@ -45,57 +46,12 @@ function MagnumLoader(pkgjson, options) {
    * So we have access to merge plugins custom errors into it.
    */
   this.injector.service('Errors', Errors)
+  this.injector.service('Logger', this.Logger)
   instance = this;
 
-  var mergedPlugins;
-  var internalPlugins = [];
-  var externalPlugins = _.chain(this.dependencies)
-    .filter(function(dep) {
-      if(dep.indexOf(instance.loadPrefix + '-') === 0) return dep
-    })
-    .map(function(dep){
-      return {require: dep, external: true}
-    })
-    .value()
-
-  // If plugin path is defined, get ready to load those as well.
-  if(this.additionalPluginDirectory){
-    internalPlugins = _.map(fs.readdirSync(this.additionalPluginDirectory), function(file){
-      return {require: path.join(instance.additionalPluginDirectory, file), external: false, filename: file};
-    })
-  }
-
-  // Merge our plugins from node_modules and the plugins from the user specified plugin directory.
-  mergedPlugins = externalPlugins.concat(internalPlugins)
-
-  // Iterate over prefixed modules, load them and their metadata.
-  this.groupedPlugins = _.chain(mergedPlugins)
-    .map(function(plugin) {
-      var pluginName = plugin.require
-      /*
-       * Attempt to load from parent, if this is a linked module use the workaround.
-       */
-      try {
-        var loadedPlugin = require(plugin.require)
-      }
-      catch (e) {
-        var prequire = require('parent-require');
-        loadedPlugin = prequire(plugin.require)
-      }
-
-      plugin.loaded = loadedPlugin;
-      if(_.isArray(plugin.loaded)){
-        return _.map(plugin.loaded, function(mPlugin){
-          var multiplePluginin = _.chain(plugin).clone().omit('loaded').value()
-          multiplePluginin.loaded = mPlugin
-          return validatePlugin(multiplePluginin)
-        })
-      }
-      return validatePlugin(plugin);
-
-    }).flatten().filter(Boolean).groupBy('meta.layer').value();
-
-
+  this.groupedPlugins = groupPlugins()
+  preActions = require('./lib/PreActions')(instance);
+  postLoadActions = require('./lib/PostActions')(instance);
   setImmediate(function() {
     instance.emit('ready')
   })
@@ -201,6 +157,56 @@ module.exports = function(injector, pkgjson, options) {
   return new MagnumLoader(injector, pkgjson, options)
 }
 
+
+function groupPlugins(){
+  var mergedPlugins;
+  var internalPlugins = [];
+  var externalPlugins = _.chain(instance.dependencies)
+    .filter(function(dep) {
+      if(dep.indexOf(instance.loadPrefix + '-') === 0) return dep
+    })
+    .map(function(dep){
+      return {require: dep, external: true}
+    })
+    .value()
+
+  // If plugin path is defined, get ready to load those as well.
+  if(instance.additionalPluginDirectory){
+    internalPlugins = _.map(fs.readdirSync(instance.additionalPluginDirectory), function(file){
+      return {require: path.join(instance.additionalPluginDirectory, file), external: false, filename: file};
+    })
+  }
+
+  // Merge our plugins from node_modules and the plugins from the user specified plugin directory.
+  mergedPlugins = externalPlugins.concat(internalPlugins)
+
+  return _.chain(mergedPlugins)
+    .map(function(plugin) {
+      var pluginName = plugin.require
+      /*
+       * Attempt to load from parent, if this is a linked module use the workaround.
+       */
+      try {
+        var loadedPlugin = require(plugin.require)
+      }
+      catch (e) {
+        var prequire = require('parent-require');
+        loadedPlugin = prequire(plugin.require)
+      }
+
+      plugin.loaded = loadedPlugin;
+      if(_.isArray(plugin.loaded)){
+        return _.map(plugin.loaded, function(mPlugin){
+          var multiplePluginin = _.chain(plugin).clone().omit('loaded').value()
+          multiplePluginin.loaded = mPlugin
+          return validatePlugin(multiplePluginin)
+        })
+      }
+      return validatePlugin(plugin);
+
+    }).flatten().filter(Boolean).groupBy('meta.layer').value();
+}
+
 /**
  * Validates plugins returned object as well as metadata.
  *
@@ -260,7 +266,8 @@ function validatePlugin(plugin) {
  * Functions passed to plugins for deferred execution.
  * @type {{load: Function, start: Function, stop: Function}}
  */
-var preActions = {
+//var preActions = require('./lib/PreActions')(instance);
+var preActionsOff = {
   load: function(p) {
     return new Promise(function(resolve, reject){
 
@@ -324,7 +331,7 @@ var preActions = {
  * Functions ran on the object returned from the group iterator.
  * @type {{load: Function, start: Function, stop: Function}}
  */
-var postLoadActions = {
+var postLoadActionsoff = {
   load: function(result) {
     return new Promise(function(resolve, reject) {
       var injectOrder = [];
@@ -440,7 +447,6 @@ function injectService(groupName, metaData, loadTarget) {
         return true
       }
       catch (e) {
-        console.log(e);
         if(retry) {
           instance.Logger.error(instance.output.conflictingName(metaData.humanName, depName));
         }
@@ -452,7 +458,6 @@ function injectService(groupName, metaData, loadTarget) {
         return tryInject(finalName)
       }
     };
-
     var result = tryInject(finalName)
 
     instance.Logger.log(instance.output.injectedDep(groupName,metaData.humanName,finalName));
