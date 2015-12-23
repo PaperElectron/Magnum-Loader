@@ -16,6 +16,7 @@ exports.metadata = {
 
 exports.plugin = {
   load: function(inject, loaded) {
+    console.log(this.options);
     setTimeout(function() {
       var C = {name: 'C', factory: true, load: function(){return {name: 'test-c', obj: 'C'}}};
       var D = {name: 'D', load: {name: 'test-c', obj: 'D'}};

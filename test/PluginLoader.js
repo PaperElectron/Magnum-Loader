@@ -49,7 +49,7 @@ describe('It loads plugins and injects dependencies', function(){
   after(function(){
     mockery.disable()
   })
-  describe('Initializing', function(){
+  describe.only('Initializing', function(){
 
     it('Should initialize.', function(done) {
       loader = require('../index')({
