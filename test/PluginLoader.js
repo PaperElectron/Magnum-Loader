@@ -25,7 +25,7 @@ var pluginOptions = {
 var options = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: mockConsole,
+  logger: console,//mockConsole,
   pluginDirectory: path.join(__dirname, '/plugins'),
   pluginOptions: pluginOptions
 }
@@ -49,7 +49,7 @@ describe('It loads plugins and injects dependencies', function(){
   after(function(){
     mockery.disable()
   })
-  describe.only('Initializing', function(){
+  describe('Initializing', function(){
 
     it('Should initialize.', function(done) {
       loader = require('../index')({
@@ -103,8 +103,8 @@ describe('It loads plugins and injects dependencies', function(){
       var l = _.flatten(_.union(_.values(loader.getLoaded())))
 
       l.forEach(function(p){
-        p.meta.loaded.should.equal(true)
-        p.meta.humanName.should.be.String()
+        p.loaded.should.equal(true)
+        p.humanName.should.be.String()
       })
     });
 
@@ -112,7 +112,8 @@ describe('It loads plugins and injects dependencies', function(){
 
   describe('Adding factories to the DI framework', function(){
     it('Should add dependency factory A', function() {
-      injector.get('A').name.should.equal('test-a')
+      var A = injector.get('A')
+      A.name.should.equal('test-a')
     });
     it('Should return distinct objects when called', function() {
       var a = injector.get('A');

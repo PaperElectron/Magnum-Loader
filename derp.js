@@ -51,6 +51,17 @@ var loader = require('./index')({
   }}, options)
 
 loader.on('ready', function(){
-  console.log('done');
   loader.load()
+})
+
+loader.on('load', function(){
+  console.log('loaded');
+})
+
+loader.on('error', function(err){
+  console.log(err);
+})
+
+process.on('uncaughtException', function(err) {
+  console.log(err);
 })

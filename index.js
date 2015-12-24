@@ -47,9 +47,12 @@ function MagnumLoader(pkgjson, options) {
 
   this.groupedPlugins = require('./lib/GroupPlugins')(instance)();
   iteratePlugins = require('./lib/Iterators')(instance);
-  setImmediate(function() {
-    instance.emit('ready')
+  iteratePlugins('init').then(function(result){
+    setImmediate(function() {
+      instance.emit('ready')
+    })
   })
+
 }
 
 util.inherits(MagnumLoader, Events)
