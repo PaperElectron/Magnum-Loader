@@ -4,7 +4,7 @@
   "description": "Plugin loader for the Magnum DI dependency injection framework.",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --recursive --ui bdd --reporter spec"
+    "test": "NODE_ENV=test mocha --ui bdd --reporter spec --check-leaks test/ test/unit/"
   },
   "keywords": [
     "Dependency Injection",
@@ -23,12 +23,12 @@
     "chalk": "^1.1.1",
     "lodash": "^3.10.1",
     "magnum-di": "^1.1.1",
-    "parent-require": "^1.0.0"
+    "parent-require": "^1.0.0",
+    "should": "^8.0.2"
   },
   "devDependencies": {
     "mocha": "^2.3.3",
-    "mockery": "^1.4.0",
-    "should": "^7.1.1"
+    "mockery": "^1.4.0"
   },
   "directories": {
     "test": "test"

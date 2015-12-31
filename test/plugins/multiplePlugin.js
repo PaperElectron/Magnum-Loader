@@ -50,5 +50,24 @@ module.exports = [
         done()
       }
     }
+  },
+  {
+    metadata: {
+      name: 'MultiplePlugin3',
+      layer: 'core'
+    },
+
+    plugin: {
+      load: function(inject, loaded) {
+
+        loaded(null, null);
+      },
+      start: function(done) {
+        done()
+      },
+      stop: function(done) {
+        done()
+      }
+    }
   }
 ]

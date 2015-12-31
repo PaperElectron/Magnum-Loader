@@ -13,7 +13,8 @@ var path = require('path');
 var mockConsole = {
   log: _.noop,
   warn:_.noop,
-  error: _.noop
+  error: _.noop,
+  info: _.noop
 }
 
 var pluginOptions = {
@@ -59,9 +60,9 @@ loader.on('load', function(){
 })
 
 loader.on('error', function(err){
-  console.log(err);
+  //console.log(err.stack);
 })
 
 process.on('uncaughtException', function(err) {
-  console.log(err);
+  //console.log(err.stack);
 })

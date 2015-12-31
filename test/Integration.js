@@ -22,12 +22,11 @@ var pluginOptions = {
     port: 3006
   }
 }
-var options = {
+var loaderOptions = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
   logger: console,//mockConsole,
   pluginDirectory: path.join(__dirname, '/plugins'),
-  pluginOptions: pluginOptions
 }
 
 describe('It loads plugins and injects dependencies', function(){
@@ -60,7 +59,7 @@ describe('It loads plugins and injects dependencies', function(){
           "pomegranate-test-d": "0.0.0",
           "pomegranate-test-e": "0.0.0",
           "pomegranate-test-f": "0.0.0"
-        }}, options)
+        }}, loaderOptions, pluginOptions)
 
       loader.on('ready', done)
     });
@@ -80,10 +79,10 @@ describe('It loads plugins and injects dependencies', function(){
   })
 
   describe('Loading Plugins', function() {
-    it('Core Should have 5 loaded plugins after initialization', function() {
+    it('Core Should have 6 loaded plugins after initialization', function() {
       var core = loader.getLoaded('core')
       core.should.be.an.Array()
-      core.length.should.equal(5)
+      core.length.should.equal(6)
     });
     it('Dependencies Should have 1 loaded plugin after initialization', function() {
       var dependency = loader.getLoaded('dependency')
@@ -146,6 +145,7 @@ describe('It loads plugins and injects dependencies', function(){
     this.timeout(3000)
     it('Should stop all registered and injected plugins. Catch errors on timeouts.', function(done) {
       loader.on('error', function(err){
+        console.log(err);
         err.message.should.equal('Timeout exceeded (2000ms) attempting to stop test_c')
       })
       loader.on('stop', done)

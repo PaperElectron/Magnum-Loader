@@ -11,23 +11,31 @@ var _ = require('lodash');
 var Events = require('events').EventEmitter;
 var util = require('util');
 var Errors = require('./lib/Errors');
+var AppendLogger = require('./lib/AppendLogger');
 var instance = null;
-var iteratePlugins;
-var PluginFactory = require('./lib/PluginFactory')
+var PluginIterator = require('./lib/PluginIterator');
 /**
  *
  * @module magnum-loader
  */
-function MagnumLoader(pkgjson, options) {
+function MagnumLoader(pkgjson, loaderOptions, pluginOptions) {
   Events.call(this)
-  this.options = options || {};
-  this.loadPrefix = options.prefix || (function(){throw new Errors.OptionsError('options.prefix not set')})();
-  this.layers = options.layers || (function(){throw new Errors.OptionsError('options.layers not set!')})();
-  this.additionalPluginDirectory = options.pluginDirectory || false
-  this.pluginOptions = options.pluginOptions || {};
-  this.timeout = options.timeout || 2000;
-  this.Logger = options.logger || console;
-  this.output = require('./lib/Outputs')(options.output);
+  var parsedArgs = require('./lib/OptionParser')(loaderOptions, Errors);
+
+  this.loaderOptions = loaderOptions || {};
+  this.pluginOptions = pluginOptions || {};
+  this.parentDirectory = parsedArgs.parentDirectory;
+  this.loaderPrefix = parsedArgs.prefix;
+  this.loaderLayers = parsedArgs.layers;
+  this.additionalPluginDirectory = parsedArgs.pluginDirectory;
+  this.timeout = parsedArgs.timeout;
+  this.Output = require('./lib/Outputs')(parsedArgs.colors, parsedArgs.verbose);
+
+  //Various loggers.
+  this.Logger = parsedArgs.logger;
+  this.SystemLogger = AppendLogger(parsedArgs.logger, this.loaderPrefix, this.Output, parsedArgs.verbose);
+  this.FrameworkLogger = AppendLogger(parsedArgs.logger, this.loaderPrefix, this.Output, true);
+
   this.loadErrors = []
   this.states = {
     load: false,
@@ -45,12 +53,15 @@ function MagnumLoader(pkgjson, options) {
   this.injector.service('Logger', this.Logger)
   instance = this;
 
-  this.groupedPlugins = require('./lib/GroupPlugins')(instance)();
-  iteratePlugins = require('./lib/Iterators')(instance);
-  iteratePlugins('init').then(function(result){
-    setImmediate(function() {
-      instance.emit('ready')
-    })
+  this.groupedPlugins = require('./lib/GroupPlugins')(instance);
+  this.iterator = new PluginIterator(this.groupedPlugins, this.loaderLayers, {
+    FrameworkLogger: this.FrameworkLogger,
+    SystemLogger: this.SystemLogger,
+    PluginLogger: parsedArgs.logger,
+    Output: this.Output
+  });
+  setImmediate(function() {
+    instance.emit('ready')
   })
 
 }
@@ -61,7 +72,7 @@ util.inherits(MagnumLoader, Events)
  * Returns a reference to the Magnum DI injector object.
  * @returns {Object} Magnum DI
  */
-MagnumLoader.prototype.getInjector = function(){
+MagnumLoader.prototype.getInjector = function() {
   return this.injector
 }
 
@@ -73,15 +84,16 @@ MagnumLoader.prototype.load = function() {
   if(this.states.load) {
     throw new Error('Load state already transitioned to.')
   }
-  var self = this;
   this.states.load = true;
-  iteratePlugins('load')
+  return this.iterator.load()
     .then(function(result) {
-      self.emit('load')
-      return null
+      instance.emit('load');
+      instance.FrameworkLogger.log(instance.Output.pluginActionComplete(result, 'Loaded', 'dependencies added to injector.'));
+      return result
     })
-    .catch(function(err){
-      self.emit('error', err)
+    .catch(function(err) {
+      instance.FrameworkLogger.error(err.plugin.humanName + ' Encountered error while loading');
+      instance.emit('error', err)
     })
 };
 
@@ -92,24 +104,15 @@ MagnumLoader.prototype.start = function() {
   if(this.states.start) {
     throw new Error('Start state already transitioned to.')
   }
-  var self = this;
   this.states.start = true;
-  iteratePlugins('start')
-    .then(function(result) {
-      if(instance.loadErrors.length > 0){
-        var plural = instance.loadErrors.length === 1 ? ' error.' : ' errors.';
-        var titleMsg = 'Start finished with ' + instance.loadErrors.length + plural;
-        instance.Logger.error(instance.output.errorTitle(titleMsg));
-        _.each(instance.loadErrors, function(err){
-          instance.Logger.error(err)
-        })
-      }
-
-      self.emit('start')
-      return null
+  return this.iterator.start()
+    .then(function iteratorStarted(result) {
+      instance.emit('start');
+      instance.FrameworkLogger.log(instance.Output.pluginActionComplete(result, 'Started'));
+      return result
     })
-    .catch(function(err){
-      self.emit('error', err)
+    .catch(function iteratorStartedError(err) {
+      instance.emit('error', err)
     })
 };
 
@@ -121,16 +124,16 @@ MagnumLoader.prototype.stop = function() {
   if(this.states.stop) {
     throw new Error('Stop state already transitioned to.')
   }
-  var self = this;
   this.states.stop = true;
-  iteratePlugins('stop')
+  return this.iterator.stop()
     .then(function(result) {
-      self.emit('stop')
-      return null
+      instance.emit('stop')
+      instance.FrameworkLogger.log(instance.Output.pluginActionComplete(result, 'Stopped'));
+      return result
     })
-    .catch(function(err){
-      self.emit('error', err)
-      self.emit('stop')
+    .catch(function(err) {
+      instance.emit('error', err)
+      instance.emit('stop')
     })
 };
 /**
