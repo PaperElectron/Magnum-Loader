@@ -13,7 +13,8 @@ var path = require('path');
 var mockConsole = {
   log: _.noop,
   warn:_.noop,
-  error: _.noop
+  error: _.noop,
+  info: _.noop
 }
 
 var pluginOptions = {
@@ -25,7 +26,7 @@ var pluginOptions = {
 var loaderOptions = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: console,//mockConsole,
+  logger: mockConsole,
   pluginDirectory: path.join(__dirname, '/plugins'),
 }
 
