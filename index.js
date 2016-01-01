@@ -7,6 +7,7 @@
 
 'use strict';
 var Injector = require('magnum-di');
+var PluginFactory = require('./lib/PluginFactory');
 var MagnumLoader = require('./lib/MagnumLoader');
 var OptionParser = require('./lib/OptionParser');
 var Errors = require('./lib/Errors');
@@ -29,7 +30,7 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
   var Output = require('./lib/Outputs')(fOpts.colors, fOpts.verbose);
   var Loggers = {
     Output: Output,
-    Logger: AppendLogger(fOpts.logger, 'plugin', Output, fOpts.verbose),
+    Logger: fOpts.logger,
     SystemLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, fOpts.verbose),
     FrameworkLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, true)
   };

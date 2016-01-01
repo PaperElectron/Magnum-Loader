@@ -8,6 +8,18 @@ A package.json based plugin loading system for the Magnum DI dependency injectio
 $ npm  install magnum-loader --save
 ```
 
+### Overview
+
+Magnum Loader is a layer ordered, hook based plugin system. Plugins can be automatically loaded from the requireing modules package.json, as well as from a configurable plugin directory.
+
+Plugin hook functions are provided several parameters with which to interact with the loader as well as several context dependent properties bound to "this" inside the hook functions.
+
+Plugin Hooks are run in layer order, each plugin has the ability to add dependencies to the Magnum DI injector, allowing subsequent layers 
+access to the dependencies added by previous layers.
+
+A plugin module can return one plugin or several in an array, and each individual plugin can inject a single dependency object, merge with an existing object, inject a factory function, or return an array of the above.
+
+
 ### Usage
 
 ```javascript
@@ -52,3 +64,8 @@ process.on('SIGINT', function() {
     loader.stop();
 });
 ```
+
+### Plugin Specification
+
+
+ 
