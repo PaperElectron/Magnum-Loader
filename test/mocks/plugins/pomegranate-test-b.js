@@ -11,6 +11,7 @@
  */
 
 exports.metadata = {
+  name: 'Test-B',
   "layer": "dependency",
   "inject": "B"
 }

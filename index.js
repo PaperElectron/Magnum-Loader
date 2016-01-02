@@ -57,7 +57,8 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
   }
   catch(err){
     Shared.Loggers.FrameworkLogger.error(err.message)
-    process.exit()
+    Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
+    process.exit();
   }
   var iterator = new PluginIterator(loadedPlugins, fOpts.layers, Shared)
 

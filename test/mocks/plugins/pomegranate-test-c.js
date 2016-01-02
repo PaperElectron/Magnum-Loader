@@ -11,6 +11,7 @@
  */
 
 exports.metadata = {
+  name: 'Test-C',
   "layer": "platform"
 }
 

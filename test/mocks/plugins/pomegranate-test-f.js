@@ -11,6 +11,7 @@ var Promise = require('bluebird');
  */
 
 exports.metadata = {
+  name: 'Test-F',
   "layer": "data",
   "inject": "F"
 }
