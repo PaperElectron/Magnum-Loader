@@ -21,8 +21,9 @@ exports.plugin = {
       var D = {name: 'X', load: {name: 'dependency-d', obj: 'X'}}
       var Y = {name: 'Y', load: {name: 'dependency-d', obj: 'Y'}}
       var Z = {name: 'Z', load: {name: 'dependency-d', obj: 'Z'}}
+      var merge = {name: 'Merge', type: 'merge', load: {second: 'second'}}
 
-      loaded(null, [W,D,Y,Z])
+      loaded(null, [W,D,Y,Z, merge])
     }, 100)
 
   },

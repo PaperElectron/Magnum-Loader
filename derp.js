@@ -26,20 +26,21 @@ var pluginOptions = {
 var options = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: mockConsole,
+  logger: console,
+  verbose: false,
+  parentDirectory: __dirname,
   pluginDirectory: path.join(__dirname, '/test/plugins'),
-  pluginOptions: pluginOptions
 }
 
 mockery.enable()
 mockery.warnOnUnregistered(false);
 
-mockery.registerSubstitute('pomegranate-test-a', './test/mocks/pomegranate-test-a');
-mockery.registerSubstitute('pomegranate-test-b', './test/mocks/pomegranate-test-b');
-mockery.registerSubstitute('pomegranate-test-c', './test/mocks/pomegranate-test-c');
-mockery.registerSubstitute('pomegranate-test-d', './test/mocks/pomegranate-test-d');
-mockery.registerSubstitute('pomegranate-test-e', './test/mocks/pomegranate-test-e');
-mockery.registerSubstitute('pomegranate-test-f', './test/mocks/pomegranate-test-f');
+mockery.registerSubstitute('pomegranate-test-a', './test/mocks/plugins/pomegranate-test-a');
+mockery.registerSubstitute('pomegranate-test-b', './test/mocks/plugins/pomegranate-test-b');
+mockery.registerSubstitute('pomegranate-test-c', './test/mocks/plugins/pomegranate-test-c');
+mockery.registerSubstitute('pomegranate-test-d', './test/mocks/plugins/pomegranate-test-d');
+mockery.registerSubstitute('pomegranate-test-e', './test/mocks/plugins/pomegranate-test-e');
+mockery.registerSubstitute('pomegranate-test-f', './test/mocks/plugins/pomegranate-test-f');
 
 var loader = require('./index')({
   "dependencies": {
@@ -49,7 +50,7 @@ var loader = require('./index')({
     "pomegranate-test-d": "0.0.0",
     "pomegranate-test-e": "0.0.0",
     "pomegranate-test-f": "0.0.0"
-  }}, options)
+  }}, options, pluginOptions)
 
 loader.on('ready', function(){
   loader.load()
@@ -60,9 +61,9 @@ loader.on('load', function(){
 })
 
 loader.on('error', function(err){
-  //console.log(err.stack);
+  console.log(err.stack);
 })
 
 process.on('uncaughtException', function(err) {
-  //console.log(err.stack);
+  console.log(err.stack);
 })

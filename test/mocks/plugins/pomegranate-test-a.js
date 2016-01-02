@@ -13,7 +13,7 @@ var Promise = require('bluebird');
 exports.metadata = {
   "layer": "core",
   "inject": "A",
-  "factory": true
+  "type": 'factory'
 }
 
 exports.plugin = {

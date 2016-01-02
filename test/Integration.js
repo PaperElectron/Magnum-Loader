@@ -37,12 +37,12 @@ describe('It loads plugins and injects dependencies', function(){
     mockery.enable()
     mockery.warnOnUnregistered(false);
 
-    mockery.registerSubstitute('pomegranate-test-a', './mocks/pomegranate-test-a');
-    mockery.registerSubstitute('pomegranate-test-b', './mocks/pomegranate-test-b');
-    mockery.registerSubstitute('pomegranate-test-c', './mocks/pomegranate-test-c');
-    mockery.registerSubstitute('pomegranate-test-d', './mocks/pomegranate-test-d');
-    mockery.registerSubstitute('pomegranate-test-e', './mocks/pomegranate-test-e');
-    mockery.registerSubstitute('pomegranate-test-f', './mocks/pomegranate-test-f');
+    mockery.registerSubstitute('pomegranate-test-a', './mocks/plugins/pomegranate-test-a');
+    mockery.registerSubstitute('pomegranate-test-b', './mocks/plugins/pomegranate-test-b');
+    mockery.registerSubstitute('pomegranate-test-c', './mocks/plugins/pomegranate-test-c');
+    mockery.registerSubstitute('pomegranate-test-d', './mocks/plugins/pomegranate-test-d');
+    mockery.registerSubstitute('pomegranate-test-e', './mocks/plugins/pomegranate-test-e');
+    mockery.registerSubstitute('pomegranate-test-f', './mocks/plugins/pomegranate-test-f');
 
   })
 
@@ -57,7 +57,7 @@ describe('It loads plugins and injects dependencies', function(){
           "pomegranate-test-a": "0.0.0",
           "pomegranate-test-b": "0.0.0",
           "pomegranate-test-c": "0.0.0",
-          "pomegranate-test-d": "0.0.0",
+          //"pomegranate-test-d": "0.0.0",
           "pomegranate-test-e": "0.0.0",
           "pomegranate-test-f": "0.0.0"
         }}, loaderOptions, pluginOptions)
@@ -110,6 +110,15 @@ describe('It loads plugins and injects dependencies', function(){
 
   })
 
+  describe('Adding merged plugins to the DI framework', function() {
+    it('Should have dependency Merge', function() {
+      var Merge = injector.get('Merge');
+      Merge.should.be.Object()
+      Merge.first.should.equal('first');
+      Merge.second.should.equal('second');
+    });
+  })
+
   describe('Adding factories to the DI framework', function(){
     it('Should add dependency factory A', function() {
       var A = injector.get('A')
@@ -146,7 +155,6 @@ describe('It loads plugins and injects dependencies', function(){
     this.timeout(3000)
     it('Should stop all registered and injected plugins. Catch errors on timeouts.', function(done) {
       loader.on('error', function(err){
-        console.log(err);
         err.message.should.equal('Timeout exceeded (2000ms) attempting to stop test_c')
       })
       loader.on('stop', done)

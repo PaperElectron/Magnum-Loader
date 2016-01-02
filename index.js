@@ -8,6 +8,7 @@
 'use strict';
 var Injector = require('magnum-di');
 var PluginFactory = require('./lib/PluginFactory');
+var PluginIterator = require('./lib/PluginIterator');
 var MagnumLoader = require('./lib/MagnumLoader');
 var OptionParser = require('./lib/OptionParser');
 var Errors = require('./lib/Errors');
@@ -34,7 +35,6 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     SystemLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, fOpts.verbose),
     FrameworkLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, true)
   };
-
   Injector.service('Errors', Errors);
   Injector.service('Logger', Loggers.Logger);
 
@@ -43,8 +43,24 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     Loggers.FrameworkLogger('No Dependencies found in package.json.')
   }
 
-  /**
-   *  Probably more parameters than is needed.
-   */
-  return MagnumLoader(Injector, pkgDependencies, fOpts, pluginOptions, Loggers)
+  var Shared = {
+    Injector: Injector,
+    Loggers: Loggers,
+    Output: Loggers.Output,
+    ParentDirectory: fOpts.parentDirectory,
+    additionalPluginDirectory: fOpts.pluginDirectory,
+    loaderPrefix: fOpts.prefix
+  }
+
+  try {
+    var loadedPlugins = PluginFactory(pkgDependencies, pluginOptions, Shared);
+  }
+  catch(err){
+    Shared.Loggers.FrameworkLogger.error(err.message)
+    process.exit()
+  }
+  var iterator = new PluginIterator(loadedPlugins, fOpts.layers, Shared)
+
+
+  return MagnumLoader(iterator, Shared)
 };

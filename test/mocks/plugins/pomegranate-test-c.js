@@ -17,12 +17,12 @@ exports.metadata = {
 exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
-      var C = {name: 'C', factory: true, load: function(){return {name: 'test-c', obj: 'C'}}};
+      var C = {name: 'C', type: 'factory', load: function(){return {name: 'test-c', obj: 'C'}}};
       var D = {name: 'D', load: {name: 'test-c', obj: 'D'}};
       var E = {name: 'E', load: {name: 'test-c', obj: 'E'}};
       var A = {name: 'A', load: {name: 'test-c', obj: 'A'}};
-
-      loaded(null, [C,D,E,A])
+      var merge = {name: 'Merge', type: 'merge', load: {first: 'first'}}
+      loaded(null, [C,D,E,A, merge])
     }, 100)
 
   },

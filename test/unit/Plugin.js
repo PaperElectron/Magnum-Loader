@@ -43,25 +43,25 @@ describe('Plugin Module', function() {
     it('Should throw with missing module name', function() {
       (function() {
         new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw('No module name.');
+      }).should.throw(/No module name./);
     });
     it('Should throw with missing plugin metadata', function() {
       (function() {
-        pin_Missing.filename = 'test-1'
+        pin_Missing.moduleName = 'test-1'
         new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw('Plugin missing or invalid metadata');
+      }).should.throw(/Metadata missing or invalid./);
     });
     it('Should throw with missing plugin object.', function() {
       (function() {
         pin_Missing.loaded.metadata = {layer: 'core'}
         new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw('Plugin does not contain a plugin property.');
+      }).should.throw(/Does not contain a plugin property./);
     });
     it('Should throw with missing plugin hooks.', function() {
       (function() {
         pin_Missing.loaded.plugin = {}
         new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw('Plugin missing hook methods.');
+      }).should.throw(/Missing hook methods./);
     });
     it('Should throw with missing plugin hooks.', function() {
       (function() {
