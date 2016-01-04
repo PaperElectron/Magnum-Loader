@@ -13,12 +13,15 @@ var injector = require('magnum-di');
 var instanceObjects = {
   Logger: console,
   Injector: injector,
-  Output: {options: {verbose: true}}
+  Output: {options: {verbose: true}},
+  GlobalOptions: {
+    timeout: 2000
+  }
 }
 
 var pin_Good = {
   loaded: {
-    metadata:{layer: 'core'},
+    metadata:{layer: 'core', name: 'good', inject: 'bob'},
     plugin: {load: load, start: isDone, stop: isDone}
   }
 }
@@ -38,7 +41,13 @@ describe('Plugin Module', function() {
     it('Should throw with improper arguments length', function(){
       (function() {
         new Plugin()
-      }).should.throw('Plugin requires 3 arguments.')
+      }).should.throw('Plugin requires 3 arguments.');
+      (function() {
+        new Plugin(pin_Missing)
+      }).should.throw('Plugin requires 3 arguments.');
+      (function() {
+        new Plugin(pin_Missing, {})
+      }).should.throw('Plugin requires 3 arguments.');
     });
     it('Should throw with missing module name', function() {
       (function() {

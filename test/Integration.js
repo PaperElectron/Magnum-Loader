@@ -26,7 +26,8 @@ var pluginOptions = {
 var loaderOptions = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: mockConsole,
+  logger: console,//mockConsole,
+  parentDirectory: __dirname,
   pluginDirectory: path.join(__dirname, '/plugins'),
 }
 

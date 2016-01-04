@@ -1,41 +1,36 @@
 /**
- * @file index
+ * @file isolate-test-a
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
-var Promise = require('bluebird');
+
 /**
  *
- * @module index
+ * @module isolate-test-a
  */
 
 exports.defaults = {
-  workDir: './mockWorkDir',
-  derp: 'herp'
+  name: 'herp'
 }
 
 exports.metadata = {
   "name": 'Test-A',
   "layer": "core",
   "inject": "A",
-  "type": 'factory'
+  "type": 'service'
 }
 
 exports.plugin = {
   load: function(inject, loaded) {
-    setTimeout(function() {
-      loaded(null, function(){
-        return {name: 'test-a', random: Math.random()}
-      })
-    }, 100)
-
+    loaded(null, {name: 'test-a'})
   },
   start: function(done) {
-    return new Promise(function(resolve, reject){
-      resolve(done(null))
-    })
+    setTimeout(function(){
+      done(null)
+    }, 1500)
   },
   stop: function() {
+    done(null)
   }
 };

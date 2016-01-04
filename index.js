@@ -32,8 +32,8 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
   var Loggers = {
     Output: Output,
     Logger: fOpts.logger,
-    SystemLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, fOpts.verbose),
-    FrameworkLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, true)
+    SystemLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, fOpts.verbose, 'magenta'),
+    FrameworkLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, true, 'magenta')
   };
   Injector.service('Errors', Errors);
   Injector.service('Logger', Loggers.Logger);
@@ -47,6 +47,7 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     Injector: Injector,
     Loggers: Loggers,
     Output: Loggers.Output,
+    GlobalOptions: fOpts,
     ParentDirectory: fOpts.parentDirectory,
     additionalPluginDirectory: fOpts.pluginDirectory,
     loaderPrefix: fOpts.prefix
