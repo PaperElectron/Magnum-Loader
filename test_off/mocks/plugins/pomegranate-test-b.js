@@ -30,7 +30,6 @@ exports.plugin = {
      */
     var myPluginObject = {
       name: 'test-b',
-      random: Math.random(),
       sayName: function(){
         self.Logger.log(myPluginObject.name)
       }

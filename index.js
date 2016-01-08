@@ -12,7 +12,7 @@ var PluginIterator = require('./lib/PluginIterator');
 var MagnumLoader = require('./lib/MagnumLoader');
 var OptionParser = require('./lib/OptionParser');
 var Errors = require('./lib/Errors');
-var AppendLogger = require('./lib/AppendLogger');
+var AppendLogger = require('./lib/LoggerBuilder');
 var _ = require('lodash');
 
 /**
@@ -47,7 +47,8 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     Injector: Injector,
     Loggers: Loggers,
     Output: Loggers.Output,
-    GlobalOptions: fOpts,
+    FrameworkErrors: Errors,
+    FrameworkOptions: fOpts,
     ParentDirectory: fOpts.parentDirectory,
     additionalPluginDirectory: fOpts.pluginDirectory,
     loaderPrefix: fOpts.prefix
@@ -62,7 +63,6 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     process.exit();
   }
   var iterator = new PluginIterator(loadedPlugins, fOpts.layers, Shared)
-
 
   return MagnumLoader(iterator, Shared)
 };

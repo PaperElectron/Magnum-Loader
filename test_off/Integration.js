@@ -26,7 +26,7 @@ var pluginOptions = {
 var loaderOptions = {
   prefix: 'pomegranate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: console,//mockConsole,
+  logger: mockConsole,
   parentDirectory: __dirname,
   pluginDirectory: path.join(__dirname, '/plugins'),
 }
@@ -122,8 +122,10 @@ describe('It loads plugins and injects dependencies', function(){
 
   describe('Adding factories to the DI framework', function(){
     it('Should add dependency factory A', function() {
-      var A = injector.get('A')
-      A.name.should.equal('test-a')
+      injector.inject(function(A){
+        A.name.should.equal('test-a')
+      })
+
     });
     it('Should return distinct objects when called', function() {
       var a = injector.get('A');
@@ -135,11 +137,6 @@ describe('It loads plugins and injects dependencies', function(){
   describe('Adding objects to the DI framework', function() {
     it('Should add dependency B', function() {
       injector.get('B').name.should.equal('test-b')
-    });
-    it('Should handle name conflicts', function() {
-      var conflict = injector.get('test_c_A')
-      conflict.should.be.an.object
-      conflict.name.should.equal('test-c')
     });
   })
 

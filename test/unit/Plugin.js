@@ -1,97 +1,91 @@
 /**
- * @file Plugin
+ * @file plugin
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
-var should = require('should');
+"use strict";
+
+var tap = require('tap');
+var mockery = require('mockery');
 var path = require('path');
 var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin'));
 var injector = require('magnum-di');
 
-var instanceObjects = {
-  Logger: console,
-  Injector: injector,
-  Output: {options: {verbose: true}},
-  GlobalOptions: {
-    timeout: 2000
-  }
-}
-
-var pin_Good = {
-  loaded: {
-    metadata:{layer: 'core', name: 'good', inject: 'bob'},
-    plugin: {load: load, start: isDone, stop: isDone}
-  }
-}
+mockery.enable({
+  useCleanCache: true,
+  warnOnUnregistered: false
+});
 
 var pin_Missing = {
   loaded: {
     //metadata:{layer: 'core'}
   }
+};
+
+var instanceObjects = {
+  Logger: console,
+  Injector: injector,
+  Output: {options: {verbose: true}},
+  FrameworkOptions: {
+    timeout: 2000,
+    layers: ['core']
+  }
+};
+
+function inst(a, b, c){
+  var args = arguments;
+  return function(){
+    return Plugin.apply(Plugin, args)
+  }
+
 }
 
-var pin_Bad = {
+tap.test('Plugin Module improper instantiation.', function(t) {
 
-}
+  t.plan(10);
+  t.throws(inst(), /Plugin requires 3 arguments/, 'Throws with no args');
+  t.throws(inst({}), /Plugin requires 3 arguments/, 'Throws with 1 arg');
+  t.throws(inst({},{}), /Plugin requires 3 arguments/, 'Throws with 2 args');
+  t.throws(inst(pin_Missing, {}, instanceObjects), /No module name/, 'Throws with no module name');
 
-describe('Plugin Module', function() {
-  describe('Improper instantiation', function(){
-    it('Should throw with improper arguments length', function(){
-      (function() {
-        new Plugin()
-      }).should.throw('Plugin requires 3 arguments.');
-      (function() {
-        new Plugin(pin_Missing)
-      }).should.throw('Plugin requires 3 arguments.');
-      (function() {
-        new Plugin(pin_Missing, {})
-      }).should.throw('Plugin requires 3 arguments.');
-    });
-    it('Should throw with missing module name', function() {
-      (function() {
-        new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw(/No module name./);
-    });
-    it('Should throw with missing plugin metadata', function() {
-      (function() {
-        pin_Missing.moduleName = 'test-1'
-        new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw(/Metadata missing or invalid./);
-    });
-    it('Should throw with missing plugin object.', function() {
-      (function() {
-        pin_Missing.loaded.metadata = {layer: 'core'}
-        new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw(/Does not contain a plugin property./);
-    });
-    it('Should throw with missing plugin hooks.', function() {
-      (function() {
-        pin_Missing.loaded.plugin = {}
-        new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.throw(/Missing hook methods./);
-    });
-    it('Should throw with missing plugin hooks.', function() {
-      (function() {
-        pin_Missing.loaded.plugin = {load: load, start: isDone, stop: isDone}
-        new Plugin(pin_Missing, {}, instanceObjects)
-      }).should.not.throw();
-    });
-  })
+  pin_Missing.moduleName = 'test-1';
+  t.throws(inst(pin_Missing, {}, instanceObjects), /Metadata missing or invalid/, 'Throws with no metadata.');
 
-  describe('Hook functions', function(){
-    var pin;
-    describe('Load', function(){
-      it('Should reject if plugin dependency has no name and no inject property', function() {
-        pin = new Plugin(pin_Missing, {}, instanceObjects);
-        pin.load().should.be.rejectedWith(Error, {message: 'Returned dependency missing name parameter.'})
-      });
-    })
+  pin_Missing.loaded.metadata = {};
+  t.throws(inst(pin_Missing, {}, instanceObjects), /metadata.name missing/, 'Throws with no metadata.name property');
 
-  })
+  pin_Missing.loaded.metadata = {name: 'Unit'};
+  t.throws(inst(pin_Missing, {}, instanceObjects), /metadata.layer missing/, 'Throws with no metadata.layer property');
 
-})
+  pin_Missing.loaded.metadata = {name: 'Unit', layer: 'core'};
+  t.throws(inst(pin_Missing, {}, instanceObjects), /metadata.type missing/, 'Throws with no metadata.type property');
+
+  pin_Missing.loaded.metadata = {name: 'Unit', layer: 'core', type: 'service'};
+  t.throws(inst(pin_Missing, {}, instanceObjects), /Does not contain a plugin property/, 'Throws with no plugin property');
+
+  pin_Missing.loaded.plugin = {};
+  t.throws(inst(pin_Missing, {}, instanceObjects), /Missing hook methods/, 'Throws with missing hook methods.')
+});
+
+tap.test('Plugin module instantiates with correct args', function(t) {
+  var plugin;
+  t.plan(3);
+
+  pin_Missing.loaded.plugin = {load: load, start: isDone, stop: isDone};
+
+  function noThrow(){
+    plugin = new Plugin(pin_Missing, {}, instanceObjects)
+  }
+  t.doesNotThrow(noThrow, 'Instantiates');
+  t.ok(plugin, 'Plugin exists');
+  t.equals(plugin.declaredName, 'Unit', 'Correct values set');
+
+});
+
 
 function load(injector, loaded){return loaded(null, {ok: true})}
-function isDone(done){return done(null)};
+function isDone(done) {
+  return done(null)
+}

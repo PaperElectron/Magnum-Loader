@@ -10,12 +10,6 @@
  * @module index
  */
 
-exports.metadata = {
-  name: 'Test-E',
-  type: 'dynamic',
-  "layer": "core"
-}
-
 exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
@@ -23,20 +17,15 @@ exports.plugin = {
       var D = {name: 'X', load: {name: 'dependency-d', obj: 'X'}}
       var Y = {name: 'Y', load: {name: 'dependency-d', obj: 'Y'}}
       var Z = {name: 'Z', load: {name: 'dependency-d', obj: 'Z'}}
-      var merge = {name: 'Merge', type: 'merge', load: {second: 'second'}}
 
-      loaded(null, [W,D,Y,Z, merge])
+      loaded(null, [W,D,Y,Z])
     }, 100)
 
   },
   start: function(done) {
-    setTimeout(function(){
-      done(null)
-    }, 100)
+    done(null)
   },
-  stop: function(done) {
-    setTimeout(function(){
-      done()
-    }, 100)
+  stop: function() {
+
   }
 };

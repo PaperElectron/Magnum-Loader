@@ -10,17 +10,24 @@ var Promise = require('bluebird');
  * @module index
  */
 
+exports.defaults = {
+  workDir: './mockWorkDir',
+  derp: 'herp'
+}
+
 exports.metadata = {
-  name: 'Test-F',
-  "layer": "data",
-  type: 'service',
-  "inject": "F"
+  "name": 'Test-A',
+  "layer": "core",
+  "inject": "A",
+  "type": 'factory'
 }
 
 exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
-      loaded(null, {name: 'test-a'})
+      loaded(null, function(){
+        return {name: 'test-a', random: Math.random()}
+      })
     }, 100)
 
   },
