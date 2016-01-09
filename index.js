@@ -10,7 +10,7 @@ var Injector = require('magnum-di');
 var PluginFactory = require('./lib/PluginFactory');
 var PluginIterator = require('./lib/PluginIterator');
 var MagnumLoader = require('./lib/MagnumLoader');
-var OptionParser = require('./lib/OptionParser');
+var OptionParser = require('./lib/FrameworkOptions');
 var Errors = require('./lib/Errors');
 var AppendLogger = require('./lib/LoggerBuilder');
 var _ = require('lodash');
@@ -21,19 +21,19 @@ var _ = require('lodash');
  * other objects, so I'm trying to keep it as simple as possible.
  *
  * @param pkgJson Package.json file, better correspond to the nearest node_modules
- * @param frameworkOptions Configure the loader itself.
- * @param pluginOptions
+ * @param frameworkOpts Configure the loader itself.
+ * @param pluginOpts
  * @returns {MagnumLoader}
  */
-module.exports = function(pkgJson, frameworkOptions, pluginOptions){
+module.exports = function(pkgJson, frameworkOpts, pluginOpts){
 
-  var fOpts = OptionParser(frameworkOptions, Errors);
-  var Output = require('./lib/Outputs')(fOpts.colors, fOpts.verbose);
+  var FrameworkOptions = OptionParser(frameworkOpts, Errors);
+  var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
     Output: Output,
-    Logger: fOpts.logger,
-    SystemLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, fOpts.verbose, 'magenta'),
-    FrameworkLogger: AppendLogger(fOpts.logger, fOpts.prefix, Output, true, 'magenta')
+    Logger: FrameworkOptions.logger,
+    SystemLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, FrameworkOptions.verbose, 'magenta'),
+    FrameworkLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, true, 'magenta')
   };
   Injector.service('Errors', Errors);
   Injector.service('Logger', Loggers.Logger);
@@ -48,21 +48,21 @@ module.exports = function(pkgJson, frameworkOptions, pluginOptions){
     Loggers: Loggers,
     Output: Loggers.Output,
     FrameworkErrors: Errors,
-    FrameworkOptions: fOpts,
-    ParentDirectory: fOpts.parentDirectory,
-    additionalPluginDirectory: fOpts.pluginDirectory,
-    loaderPrefix: fOpts.prefix
+    FrameworkOptions: FrameworkOptions,
+    ParentDirectory: FrameworkOptions.parentDirectory,
+    additionalPluginDirectory: FrameworkOptions.pluginDirectory,
+    loaderPrefix: FrameworkOptions.prefix
   }
 
   try {
-    var loadedPlugins = PluginFactory(pkgDependencies, pluginOptions, Shared);
+    var loadedPlugins = PluginFactory(pkgDependencies, pluginOpts, Shared);
   }
   catch(err){
     Shared.Loggers.FrameworkLogger.error(err.message)
     Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
     process.exit();
   }
-  var iterator = new PluginIterator(loadedPlugins, fOpts.layers, Shared)
+  var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared)
 
   return MagnumLoader(iterator, Shared)
 };
