@@ -10,6 +10,9 @@ var util = require('util');
  *
  * @module testPlugin
  */
+exports.defaults = {
+  workDir: 'testPlugin'
+}
 
 exports.metadata = {
   name: 'Test-plugin',

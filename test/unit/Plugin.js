@@ -10,7 +10,7 @@
 var tap = require('tap');
 var mockery = require('mockery');
 var path = require('path');
-var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin'));
+var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin/Plugin'));
 var injector = require('magnum-di');
 
 mockery.enable({
