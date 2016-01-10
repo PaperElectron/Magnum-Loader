@@ -210,7 +210,7 @@ tap.test('Handles plugin.defaults.workDir path validation.', function(t) {
   };
 
   //Throws
-  plugin.loaded.defaults.workDir = 'mockWorkDir/../unit/plugin.js';
+  plugin.loaded.defaults.workDir = 'mockWorkDir/.gitkeep';
   t.throws(function(){
     new PluginBase(plugin, {}, instanceObjects)
   }, /is not a directory./,'Throws if the specified workDir is not a directory.');
