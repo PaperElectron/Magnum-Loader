@@ -14,6 +14,7 @@ var util = require('util');
 var PluginBase = require(path.join(__dirname, '../../', 'lib/Plugin/PluginBase'));
 var injector = require('magnum-di');
 
+
 mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
@@ -30,6 +31,7 @@ var instanceObjects = {
   Injector: injector,
   Output: {options: {verbose: true}},
   FrameworkOptions: {
+    prefix: 'magnum',
     timeout: 2000,
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../'),
@@ -235,7 +237,7 @@ function BaseValidation(){
 
 util.inherits(BaseValidation, Error);
 
-tap.test('Validates plugin custom error objects.', function(t) {
+tap.test('Validates custom error objects exported by a plugin.', function(t) {
   t.plan(3);
   var plugin = {
     loaded: {
@@ -263,6 +265,13 @@ tap.test('Validates plugin custom error objects.', function(t) {
   t.notOk(errorBase.errors.NotAnErrorConstructor, 'Does not add a constructor not inheriting from Error');
 });
 
+tap.test('Config name from modulename', function(t){
+  t.plan(4)
+  t.throws(PluginBase.validConfigName, 'Throws with missing module name.')
+  t.equal(PluginBase.validConfigName('test-a-1', 'test'), 'a_1', "Strips prefix, and replaces - with _");
+  t.equal(PluginBase.validConfigName('testPlugin', 'test'), 'testPlugin', 'Leaves unprefixed names without - alone.')
+  t.equal(PluginBase.validConfigName('my-plugin', 'test'), 'my_plugin', 'Replaces _ with - in unprefixed plugins.')
+});
 
 function load(injector, loaded){return loaded(null, {ok: true})}
 function isDone(done) {

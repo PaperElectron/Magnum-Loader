@@ -29,6 +29,7 @@ var instanceObjects = {
   FrameworkErrors: require('../../lib/Errors'),
   Injector: injector,
   FrameworkOptions: {
+    prefix: 'magnum',
     timeout: 2000,
     layers: ['core']
   }

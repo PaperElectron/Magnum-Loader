@@ -5,9 +5,7 @@
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
-var test = require('tape');
 
-var should = require('should');
 var mockery = require('mockery');
 var _ = require('lodash');
 var path = require('path');
@@ -28,7 +26,7 @@ var pluginOptions = {
 var options = {
   prefix: 'isolate',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: mockConsole,//console,
+  logger: console,
   verbose: true,
   colors: true,
   parentDirectory: __dirname + '/test/'
@@ -46,10 +44,6 @@ var loader = require('./index')({
     "isolate-test-b": "0.0.0"
   }}, options, pluginOptions)
 
-test('thing', function(t){
-  t.equal(5, 5)
-  t.end()
-})
 
 loader.on('ready', function(){
   loader.load()
@@ -62,7 +56,7 @@ loader.on('load', function(){
 loader.on('start', function(){
   setTimeout(function(){
     loader.stop()
-  }, 1000)
+  }, 1000 * 60)
 })
 
 loader.on('stop', function(){

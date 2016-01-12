@@ -23,7 +23,7 @@ var pluginOptions = {
   }
 };
 var loaderOptions = {
-  prefix: 'pomegranate',
+  prefix: 'magnum',
   layers: ['core', 'data', 'dependency', 'platform'],
   logger: mockConsole,
   parentDirectory: path.join(__dirname, '../'),
@@ -32,11 +32,11 @@ var loaderOptions = {
 
 var pkgJson = {
   "dependencies": {
-    "pomegranate-test-a": "0.0.0",
-    "pomegranate-test-b": "0.0.0",
-    "pomegranate-test-c": "0.0.0",
-    "pomegranate-test-e": "0.0.0",
-    "pomegranate-test-f": "0.0.0"
+    "magnum-test-a": "0.0.0",
+    "magnum-test-b": "0.0.0",
+    "magnum-test-c": "0.0.0",
+    "magnum-test-e": "0.0.0",
+    "magnum-test-f": "0.0.0"
   }
 };
 
@@ -45,12 +45,12 @@ mockery.enable({
   warnOnUnregistered: false
 });
 
-mockery.registerSubstitute('pomegranate-test-a', '../mocks/plugins/pomegranate-test-a');
-mockery.registerSubstitute('pomegranate-test-b', '../mocks/plugins/pomegranate-test-b');
-mockery.registerSubstitute('pomegranate-test-c', '../mocks/plugins/pomegranate-test-c');
-mockery.registerSubstitute('pomegranate-test-d', '../mocks/plugins/pomegranate-test-d');
-mockery.registerSubstitute('pomegranate-test-e', '../mocks/plugins/pomegranate-test-e');
-mockery.registerSubstitute('pomegranate-test-f', '../mocks/plugins/pomegranate-test-f');
+mockery.registerSubstitute('magnum-test-a', '../mocks/plugins/magnum-test-a');
+mockery.registerSubstitute('magnum-test-b', '../mocks/plugins/magnum-test-b');
+mockery.registerSubstitute('magnum-test-c', '../mocks/plugins/magnum-test-c');
+mockery.registerSubstitute('magnum-test-d', '../mocks/plugins/magnum-test-d');
+mockery.registerSubstitute('magnum-test-e', '../mocks/plugins/magnum-test-e');
+mockery.registerSubstitute('magnum-test-f', '../mocks/plugins/magnum-test-f');
 
 var LoadIndex = require('../../index');
 var Loader = LoadIndex(pkgJson, loaderOptions, pluginOptions);
