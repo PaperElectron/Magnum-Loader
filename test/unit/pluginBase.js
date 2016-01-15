@@ -193,7 +193,7 @@ tap.test('PluginBase module handles correct arguments.', function(t) {
   t.doesNotThrow(noThrow, 'Throws no errors');
   t.ok(pBase, 'Plugin base exists');
   t.equal(pBase.declaredName, 'Unit', 'Correct values set');
-  t.type(pBase.humanName, 'string', 'Generated humanName is a string');
+  t.type(pBase.configName, 'string', 'Generated humanName is a string');
 });
 
 tap.test('Handles plugin.defaults.workDir path validation.', function(t) {
@@ -212,6 +212,7 @@ tap.test('Handles plugin.defaults.workDir path validation.', function(t) {
   };
 
   //Throws
+
   plugin.loaded.defaults.workDir = 'mockWorkDir/.gitkeep';
   t.throws(function(){
     new PluginBase(plugin, {}, instanceObjects)
@@ -272,6 +273,102 @@ tap.test('Config name from modulename', function(t){
   t.equal(PluginBase.validConfigName('testPlugin', 'test'), 'testPlugin', 'Leaves unprefixed names without - alone.')
   t.equal(PluginBase.validConfigName('my-plugin', 'test'), 'my_plugin', 'Replaces _ with - in unprefixed plugins.')
 });
+
+tap.test('Getting default and computed plugin config object with no user config provided.', function(t) {
+  t.plan(1)
+  var plugin = {
+    loaded: {
+      defaults: {
+        host: 'localhost',
+        password: 'password'
+      },
+      metadata: {
+        name: 'Unit',
+        layer: 'core',
+        type: 'service'
+      },
+      errors: {
+        BaseValidation: BaseValidation,
+        NotAnError: {name: 'NotAnError'},
+        NotAnErrorConstructor: function NotAnErrorConstructor(){
+          this.name = 'NotAnErrorConstructor';
+          this.message = ''
+        }
+      },
+      plugin: {load: load, start: isDone, stop: isDone}
+    },
+    moduleName: 'test-2'
+  };
+
+  var configPlugin = new PluginBase(plugin, {}, instanceObjects)
+  var defaultOpts = configPlugin.getDefaultConfig();
+  var computedOpts = configPlugin.getComputedConfig()
+  t.deepEqual(defaultOpts, computedOpts, 'Default and computed Options match with no provided config.')
+});
+
+tap.test('Getting default and computed plugin config object with no user config provided.', function(t) {
+  t.plan(4)
+  var plugin = {
+    loaded: {
+      defaults: {
+        host: 'localhost',
+        password: 'password'
+      },
+      metadata: {
+        name: 'Unit',
+        layer: 'core',
+        type: 'service'
+      },
+      errors: {
+        BaseValidation: BaseValidation,
+        NotAnError: {name: 'NotAnError'},
+        NotAnErrorConstructor: function NotAnErrorConstructor(){
+          this.name = 'NotAnErrorConstructor';
+          this.message = ''
+        }
+      },
+      plugin: {load: load, start: isDone, stop: isDone}
+    },
+    moduleName: 'test-2'
+  };
+
+  var configPlugin = new PluginBase(plugin, {test_2: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects);
+  var defaultOpts = configPlugin.getDefaultConfig();
+  var computedOpts = configPlugin.getComputedConfig();
+  t.equal(defaultOpts['test_2'].host, 'localhost', 'Default option value "host" unchanged.');
+  t.equal(defaultOpts['test_2'].password, 'password', 'Default option value "password" unchanged.');
+  t.equal(computedOpts['test_2'].host, '192.168.1.100', 'Computed option value "host" correct.');
+  t.equal(computedOpts['test_2'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
+});
+
+tap.test('Default and computed plugin configs return false if not present',function(t) {
+  t.plan(2)
+  var plugin = {
+    loaded: {
+      metadata: {
+        name: 'Unit',
+        layer: 'core',
+        type: 'service'
+      },
+      errors: {
+        BaseValidation: BaseValidation,
+        NotAnError: {name: 'NotAnError'},
+        NotAnErrorConstructor: function NotAnErrorConstructor(){
+          this.name = 'NotAnErrorConstructor';
+          this.message = ''
+        }
+      },
+      plugin: {load: load, start: isDone, stop: isDone}
+    },
+    moduleName: 'test-2'
+  };
+
+  var configPlugin = new PluginBase(plugin, {test_2: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects);
+  var defaultOpts = configPlugin.getDefaultConfig();
+  var computedOpts = configPlugin.getComputedConfig();
+  t.equal(defaultOpts, false, 'Default options are false.');
+  t.equal(computedOpts, false, 'Computed options are false.');
+})
 
 function load(injector, loaded){return loaded(null, {ok: true})}
 function isDone(done) {

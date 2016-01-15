@@ -19,8 +19,8 @@ var mockConsole = {
 
 var pluginOptions = {
   test_a: {
-    host: 'localhost',
-    port: 3006
+    name: 'localhost',
+    value: 3006
   }
 }
 var options = {
@@ -46,7 +46,10 @@ var loader = require('./index')({
 
 
 loader.on('ready', function(){
-  loader.load()
+  console.log(loader.getDefaultConfigs({stringify: true, returnDefaults: false}))
+  setTimeout(function() {
+    loader.load()
+  }, 1000);
 })
 
 loader.on('load', function(){

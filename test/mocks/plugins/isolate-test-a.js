@@ -11,7 +11,8 @@
  */
 
 exports.defaults = {
-  name: 'herp'
+  name: 'test-a',
+  value: 'spaceships'
 }
 
 exports.metadata = {

@@ -54,7 +54,12 @@ tap.test('Plugin module instantiates with correct args', function(t) {
   t.plan(3);
 
   function noThrow(){
-    plugin = new Plugin(pluginObj, {}, instanceObjects)
+    try {
+     plugin = new Plugin(pluginObj, {}, instanceObjects)
+    }
+    catch(e){
+      console.log(e.stack);
+    }
   }
   t.doesNotThrow(noThrow, 'Instantiates');
   t.ok(plugin, 'Plugin exists');

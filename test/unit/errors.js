@@ -31,7 +31,7 @@ tap.test('PluginHookError', function(t){
   t.equal(err.name, 'PluginHookError', 'Is correct type');
   t.ok(err.plugin, 'Has a plugin property');
   t.equal(err.hook, 'No hook name provided.', 'Hook name is correct.');
-  t.equal(err.plugin.humanName, 'Missing name', 'Plugin.humanName is correct')
+  t.equal(err.plugin.configName, 'Missing name', 'Plugin.humanName is correct')
 });
 
 tap.test('PluginConstructionError', function(t){
@@ -40,7 +40,7 @@ tap.test('PluginConstructionError', function(t){
   t.equal(err.message, 'Plugin not constucted correctly.', 'Has correct message');
   t.equal(err.name, 'PluginConstructionError', 'Is correct type');
   t.ok(err.plugin, 'Has a plugin property');
-  t.equal(err.plugin.humanName, 'Missing name', 'Plugin.humanName is correct')
+  t.equal(err.plugin.configName, 'Missing name', 'Plugin.humanName is correct')
 });
 
 tap.test('PluginDependencyError', function(t){
@@ -49,6 +49,6 @@ tap.test('PluginDependencyError', function(t){
   t.equal(err.message, 'Something went wrong with a dependency', 'Has correct message');
   t.equal(err.name, 'PluginDependencyError', 'Is correct type');
   t.ok(err.plugin, 'Has a plugin property');
-  t.equal(err.plugin.humanName, 'Missing name', 'Plugin.humanName is correct.');
+  t.equal(err.plugin.configName, 'Missing name', 'Plugin.humanName is correct.');
   t.equal(err.depName, 'Missing dependency name.', 'Dependency name is correct.')
 });
