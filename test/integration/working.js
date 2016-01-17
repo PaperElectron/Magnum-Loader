@@ -95,7 +95,7 @@ tap.test('Plugin metadata correctly set.', function(t) {
   t.plan(l.length * 2);
 
   l.forEach(function(p){
-    t.equal(p.loaded, true, p.configName + 'loaded.');
+    t.equal(p.loaded, true, p.configName + ' loaded.');
     t.type(p.configName, 'string', 'humanName is type string.');
   })
 })

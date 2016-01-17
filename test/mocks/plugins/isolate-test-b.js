@@ -10,7 +10,7 @@
  * @module isolate-test-b
  */
 
-exports.defaults = {
+exports.options = {
   workDir: '/mockWorkDir',
   name: 'herp'
 }

@@ -10,8 +10,8 @@ var util = require('util');
  *
  * @module testPlugin
  */
-exports.defaults = {
-  workDir: 'testPlugin'
+exports.options = {
+  workDir: 'mockWorkDir'
 }
 
 exports.metadata = {

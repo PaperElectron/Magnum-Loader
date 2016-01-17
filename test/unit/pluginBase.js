@@ -196,11 +196,11 @@ tap.test('PluginBase module handles correct arguments.', function(t) {
   t.type(pBase.configName, 'string', 'Generated humanName is a string');
 });
 
-tap.test('Handles plugin.defaults.workDir path validation.', function(t) {
+tap.test('Handles plugin.options.workDir path validation.', function(t) {
   t.plan(3);
   var plugin = {
     loaded: {
-      defaults: {},
+      options: {},
       metadata: {
         name: 'Unit',
         layer: 'core',
@@ -213,13 +213,13 @@ tap.test('Handles plugin.defaults.workDir path validation.', function(t) {
 
   //Throws
 
-  plugin.loaded.defaults.workDir = 'mockWorkDir/.gitkeep';
+  plugin.loaded.options.workDir = 'mockWorkDir/.gitkeep';
   t.throws(function(){
     new PluginBase(plugin, {}, instanceObjects)
   }, /is not a directory./,'Throws if the specified workDir is not a directory.');
 
   //Correct
-  plugin.loaded.defaults.workDir = 'mockWorkDir';
+  plugin.loaded.options.workDir = 'mockWorkDir';
   var pBase = new PluginBase(plugin, {}, instanceObjects);
   t.ok(pBase, 'PluginBase created');
 
@@ -242,7 +242,7 @@ tap.test('Validates custom error objects exported by a plugin.', function(t) {
   t.plan(3);
   var plugin = {
     loaded: {
-      defaults: {},
+      options: {},
       metadata: {
         name: 'Unit',
         layer: 'core',
@@ -278,7 +278,7 @@ tap.test('Getting default and computed plugin config object with no user config 
   t.plan(1)
   var plugin = {
     loaded: {
-      defaults: {
+      options: {
         host: 'localhost',
         password: 'password'
       },
@@ -310,7 +310,7 @@ tap.test('Getting default and computed plugin config object with no user config 
   t.plan(4)
   var plugin = {
     loaded: {
-      defaults: {
+      options: {
         host: 'localhost',
         password: 'password'
       },

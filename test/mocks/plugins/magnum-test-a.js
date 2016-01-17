@@ -10,7 +10,7 @@ var Promise = require('bluebird');
  * @module index
  */
 
-exports.defaults = {
+exports.options = {
   workDir: './mockWorkDir',
   derp: 'herp'
 }

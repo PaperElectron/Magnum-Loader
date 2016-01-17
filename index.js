@@ -18,7 +18,7 @@ var _ = require('lodash');
 /**
  * Bit of boilerplate to setup things that are used everywhere.
  * MagnumLoader Object itself is a fairly complex facade that spans several
- * other objects, so I'm trying to keep it as simple as possible.
+ * other objects, trying to keep it as simple as possible.
  *
  * @param pkgJson Package.json file, better correspond to the nearest node_modules
  * @param frameworkOpts Configure the loader itself.
@@ -60,7 +60,7 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
   catch(err){
     Shared.Loggers.FrameworkLogger.error(err.message)
     Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
-    process.exit();
+    process.exit()
   }
   var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared)
 

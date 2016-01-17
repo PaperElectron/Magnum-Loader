@@ -10,7 +10,7 @@
  * @module isolate-test-a
  */
 
-exports.defaults = {
+exports.options = {
   name: 'test-a',
   value: 'spaceships'
 }
