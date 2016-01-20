@@ -16,6 +16,7 @@ mockery.enable({
 var injector = require('magnum-di');
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
+var RawPlugin = require('../../lib/Plugin/RawPlugin');
 var Plugin = require('../../lib/Plugin/Plugin');
 var path = require('path');
 
@@ -44,13 +45,11 @@ var Shared = {
   FrameworkOptions: instanceObjects.FrameworkOptions
 };
 
-var plugins = {
-  core: [
+var plugins = [
     makePlugin('test-a'),
     makePlugin('test-b'),
     makePlugin('test-c')
   ]
-};
 
 var iteratorInst;
 
@@ -72,6 +71,7 @@ tap.test('Iterator load method', function(t) {
           t.ok(plugin.loaded, plugin.declaredName + ' loaded.');
         })
         t.end()
+        return null
       })
 
 });
@@ -86,6 +86,7 @@ tap.test('Iterator start method', function(t) {
         t.ok(plugin.started, plugin.declaredName + ' started.');
       })
       t.end()
+      return null
     })
 
 });
@@ -100,8 +101,19 @@ tap.test('Iterator stop method', function(t) {
         t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
       })
       t.end()
+      return null
     })
 
+});
+
+tap.test('Iterator build plugin configs', function(t) {
+  t.plan(2)
+  var defaults = iteratorInst.getPluginConfigs({stringify: false, defaults: true});
+  var computed = iteratorInst.getPluginConfigs({stringify: false, defaults: false});
+  console.log(defaults);
+  console.log(computed);
+  t.ok(defaults)
+  t.ok(computed)
 });
 
 tap.test('Find conflicts', function(t){
@@ -116,6 +128,7 @@ function makePlugin(moduleName) {
   var pArgs =
       {
         loaded: {
+          options: {name: moduleName},
           metadata: {name: moduleName, layer: 'core', type: 'service', inject: moduleName.replace('-', '_')},
           plugin: {
             load: function(inject, loaded) {
@@ -131,8 +144,8 @@ function makePlugin(moduleName) {
         },
         moduleName: moduleName
       };
-
-  return new Plugin(pArgs, {}, Shared)
+  var plugin = new RawPlugin(pArgs, instanceObjects.FrameworkOptions.layers)
+  return new Plugin(plugin, {}, Shared)
 }
 
 function mockConsole(){

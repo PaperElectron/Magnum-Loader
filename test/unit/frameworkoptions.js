@@ -91,7 +91,7 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
     prefix: 'magnum',
     layers: ['core'],
     parentDirectory: __dirname,
-    pluginDirectory: path.join(__dirname,'../','plugins'),
+    pluginDirectory: path.join(__dirname,'../','mocks/internalPlugins'),
     verbose: false,
     colors: false,
     logger: console
@@ -116,7 +116,7 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
   }, Errors)
   console.log(setPluginDir.pluginDirectory);
   t.plan(5)
-  t.equal(setPluginDir.pluginDirectory, path.join(__dirname,'../','plugins'), 'Sets pluginDirectory correctly')
+  t.equal(setPluginDir.pluginDirectory, path.join(__dirname,'../','mocks/internalPlugins'), 'Sets pluginDirectory correctly')
   t.equal(falseColorVerbose.verbose, false, 'options.verbose: false');
   t.equal(falseColorVerbose.colors, false, 'options.colors: false');
   t.equal(trueColorVerbose.verbose, true, 'options.verbose: true');

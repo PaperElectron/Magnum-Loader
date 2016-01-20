@@ -10,6 +10,7 @@
 var tap = require('tap');
 var mockery = require('mockery');
 var path = require('path');
+var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin/Plugin'));
 var Errors = require(path.join(__dirname, '../../', 'lib/Errors'));
 var injector = require('magnum-di');
@@ -55,7 +56,8 @@ tap.test('Plugin module instantiates with correct args', function(t) {
 
   function noThrow(){
     try {
-     plugin = new Plugin(pluginObj, {}, instanceObjects)
+     var rawPlugin = new RawPlugin(pluginObj, instanceObjects.FrameworkOptions.layers);
+     plugin = new Plugin(rawPlugin, {}, instanceObjects)
     }
     catch(e){
       console.log(e.stack);

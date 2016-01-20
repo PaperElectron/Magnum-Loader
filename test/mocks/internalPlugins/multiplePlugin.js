@@ -12,6 +12,7 @@
 
 module.exports = [
   {
+    options: {defaultName: 'No config'},
     metadata: {
       name: 'MultiplePlugin',
       layer: 'core',

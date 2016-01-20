@@ -28,10 +28,25 @@ var incompletePlugin = {
 }
 
 tap.test('Loading raw plugins', function(t){
-  t.plan(1);
+  t.plan(2);
   t.throws(function() {
     new RawPlugin()
   }, 'Throws with no args')
+
+  var rp = RawPlugin(incompletePlugin, ['core', 'data','server']);
+  t.ok(rp instanceof RawPlugin, 'Constructs with proper context without new')
+})
+
+tap.test('Returns with errors with modulename.', function(t) {
+  t.plan(5)
+  var rp = new RawPlugin({}, ['core', 'data','server']);
+  t.ok(rp, 'Returns "something"');
+  t.ok(rp.hasErrors(), 'Has some errors to report.');
+  var errors = rp.getErrors()
+  console.log(errors);
+  t.notOk(errors.moduleName, 'Returned modulename is false');
+  t.equal(errors.Errors.length, 1);
+  t.equal(rp.isValid(), false, 'Not a valid plugin.');
 })
 
 tap.test('Returns with errors with no data.', function(t) {
@@ -47,40 +62,49 @@ tap.test('Returns with errors with no data.', function(t) {
 
 tap.test('Returns with errors on partial data', function(t) {
   t.plan(1)
-  incompletePlugin.loaded.metadata = {herp: 10, inject: 'service'}
+  incompletePlugin.loaded.metadata = {blah: 10}
   var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
   var rp1errs = rp1.getErrors()
-  t.equal(rp1errs.Errors.length, 3);
+  t.equal(rp1errs.Errors.length, 4);
 })
 
 tap.test('Returns with errors from bad layer', function(t) {
   t.plan(1)
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'nope',inject: 'service'}
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'nope'}
+  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1errs = rp1.getErrors()
+  t.equal(rp1errs.Errors.length, 3, 'Correct number of errors');
+})
+
+tap.test('Returns with errors from missing or invalid hook functions', function(t) {
+  t.plan(1)
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core'}
   var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
   var rp1errs = rp1.getErrors()
   t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
 })
 
-tap.test('Returns with errors from missing or invalid hook functions', function(t) {
-  t.plan(1)
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core',inject: 'service'}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
-  var rp1errs = rp1.getErrors()
-  t.equal(rp1errs.Errors.length, 1, 'Correct number of errors');
-})
-
 tap.test('Returns with errors from invalid hook functions', function(t) {
   t.plan(1)
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core',inject: 'service'}
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core'}
   incompletePlugin.loaded.plugin = {load: load, start: 1, stop: 1}
   var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
   var rp1errs = rp1.getErrors()
-  t.equal(rp1errs.Errors.length, 1, 'Correct number of errors');
+  t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
+})
+
+tap.test('Returns with errors from wrong injection type', function(t) {
+  t.plan(1)
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core', type: 'blah'}
+  incompletePlugin.loaded.plugin = {load: load, start: 1, stop: 1}
+  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1errs = rp1.getErrors()
+  t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
 })
 
 tap.test('Returns with no errors.', function(t) {
   t.plan(2)
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core',inject: 'service'}
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core',type: 'service'}
   incompletePlugin.loaded.plugin = {load: load, start: isDone, stop: isDone}
   var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
   var rp1errs = rp1.getErrors()
@@ -91,7 +115,7 @@ tap.test('Returns with no errors.', function(t) {
 tap.test('Valid RawPlugin methods.', function(t) {
   t.plan(5)
   incompletePlugin.loaded.options = {value1: 10, someString: 'hello'};
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core',inject: 'service'}
+  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core', type: 'service'}
   incompletePlugin.loaded.plugin = {load: load, start: isDone, stop: isDone}
   incompletePlugin.loaded.errors = {BaseValidation: BaseValidation}
   var rp = new RawPlugin(incompletePlugin, ['core', 'data','server']);

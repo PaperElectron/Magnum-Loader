@@ -11,7 +11,9 @@ var tap = require('tap');
 var mockery = require('mockery');
 var path = require('path');
 var util = require('util');
+var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var PluginBase = require(path.join(__dirname, '../../', 'lib/Plugin/PluginBase'));
+var PHelpers = require('../helpers/PluginHelpers');
 var injector = require('magnum-di');
 
 
@@ -22,7 +24,6 @@ mockery.enable({
 
 var pin_Missing = {
   loaded: {
-    //metadata:{layer: 'core'}
   }
 };
 
@@ -34,7 +35,7 @@ var instanceObjects = {
     prefix: 'magnum',
     timeout: 2000,
     layers: ['core'],
-    parentDirectory: path.join(__dirname, '../'),
+    parentDirectory: path.join(__dirname, '../mocks'),
   }
 };
 
@@ -46,188 +47,57 @@ function inst(a, b, c){
 
 }
 
-tap.test('PluginBase Module argument handling', function(t) {
-
-  t.plan(12);
-
-  t.throws(function(){
-    new PluginBase()
-  }, /Plugin requires 3 arguments/, 'Throws with no args');
-
-  t.throws(function() {
-    new PluginBase({})
-  }, /Plugin requires 3 arguments/, 'Throws with 1 arg');
-
-  t.throws(function() {
-    new PluginBase({}, {})
-  }, /Plugin requires 3 arguments/, 'Throws with 2 args');
-
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {}
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /No module name/, 'Throws with no module name');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {},
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /Metadata missing or invalid/, 'Throws with no metadata.');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {}
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /metadata.name missing/, 'Throws with no metadata.name property');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit'
-        }
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /metadata.layer missing/, 'Throws with no metadata.layer property');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit',
-          layer: 'bad'
-        }
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /not in the list of available layers/, 'Throws with metadata.layer not in FrameworkOptions.layers.');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit',
-          layer: 'core'
-        }
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /metadata.type missing/, 'Throws with no metadata.type property');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit',
-          layer: 'core',
-          type: 'bad'
-        }
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /must be one of the following/, 'Throws with metadata.type not in allowed types.');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit',
-          layer: 'core',
-          type: 'service'
-        }
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /Does not contain a plugin property/, 'Throws with no plugin property');
-
-  t.throws(function(){
-    var plugin = {
-      loaded: {
-        metadata: {
-          name: 'Unit',
-          layer: 'core',
-          type: 'service'
-        },
-        plugin: {}
-      },
-      moduleName: 'test-1'
-    };
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /Missing hook methods/, 'Throws with missing hook methods.')
-
-
-});
-
 tap.test('PluginBase module handles correct arguments.', function(t) {
   t.plan(4);
   var pBase;
-  var plugin = {
-    loaded: {
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-1'
-  };
-
+  var plugin = PHelpers.completePlugin('Unit');
+  var rp = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
   function noThrow(){
-    pBase = new PluginBase(plugin, {}, instanceObjects)
+    pBase = new PluginBase(rp, {}, instanceObjects)
   }
   t.doesNotThrow(noThrow, 'Throws no errors');
   t.ok(pBase, 'Plugin base exists');
-  t.equal(pBase.declaredName, 'Unit', 'Correct values set');
+  t.equal(pBase.declaredName, 'Test_Plugin', 'Correct values set');
   t.type(pBase.configName, 'string', 'Generated humanName is a string');
 });
 
-tap.test('Handles plugin.options.workDir path validation.', function(t) {
+tap.test('Produces an invalid plugin when workDir is a file', function(t){
   t.plan(3);
-  var plugin = {
-    loaded: {
-      options: {},
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-2'
-  };
 
-  //Throws
+  var rawPlugin1 = PHelpers.completePlugin('test-2', {workDir:'mockWorkDir/.gitkeep'})
+  var plugin = new RawPlugin(rawPlugin1, instanceObjects.FrameworkOptions.layers)
+  var bp1 = new PluginBase(plugin, {}, instanceObjects)
+  t.ok(bp1, 'PluginBase Created')
+  t.equal(bp1.Errors.length, 1, 'Has the correct Errors length')
+  t.notOk(bp1.valid, 'Not a valid PluginBase')
+})
 
-  plugin.loaded.options.workDir = 'mockWorkDir/.gitkeep';
-  t.throws(function(){
-    new PluginBase(plugin, {}, instanceObjects)
-  }, /is not a directory./,'Throws if the specified workDir is not a directory.');
+tap.test('Produces an invalid plugin when workDir does not exist.', function(t) {
+  t.plan(5);
 
-  //Correct
-  plugin.loaded.options.workDir = 'mockWorkDir';
-  var pBase = new PluginBase(plugin, {}, instanceObjects);
-  t.ok(pBase, 'PluginBase created');
-
-  var computedPath = pBase.computedOptions.workDir;
-  var expectedPath = path.join(__dirname, '../', 'mockWorkDir');
-  t.equal(computedPath, expectedPath , 'Sets the correct plugin working directory')
-
+  var rawPlugin3 = PHelpers.completePlugin('test-3', {workDir:'mockWorkDerp'})
+  var plugin = new RawPlugin(rawPlugin3, instanceObjects.FrameworkOptions.layers)
+  var bp3 = new PluginBase(plugin, {}, instanceObjects)
+  t.ok(bp3, 'PluginBase Created')
+  t.ok(bp3.hasErrors(), 'hasErrors returns true');
+  t.equal(bp3.getErrors().moduleName, 'test-3')
+  t.equal(bp3.Errors.length, 1, 'Has one Error')
+  t.notOk(bp3.valid, 'Not valid')
 });
+
+tap.test('Computes workDir absolute path correctly when workDir is a directory.', function(t){
+  t.plan(2)
+  var rawPlugin2 = PHelpers.completePlugin('test-3', {workDir:'mockWorkDir'})
+  var plugin = new RawPlugin(rawPlugin2, instanceObjects.FrameworkOptions.layers)
+  var bp2 = new PluginBase(plugin, {}, instanceObjects)
+  t.ok(bp2, 'PluginBase Created')
+
+  var computedPath = bp2.computedOptions.workDir;
+  var expectedPath = path.join(__dirname, '../mocks', 'mockWorkDir');
+  t.equal(computedPath, expectedPath , 'Sets the correct plugin working directory')
+})
+
+
 
 function BaseValidation(){
   var thisErr = Error.apply(this, arguments);
@@ -240,26 +110,17 @@ util.inherits(BaseValidation, Error);
 
 tap.test('Validates custom error objects exported by a plugin.', function(t) {
   t.plan(3);
-  var plugin = {
-    loaded: {
-      options: {},
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      errors: {
-        BaseValidation: BaseValidation,
-        NotAnError: {name: 'NotAnError'},
-        NotAnErrorConstructor: function NotAnErrorConstructor(){
-          this.name = 'NotAnErrorConstructor';
-          this.message = ''
-        }
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-2'
-  };
+  var errs = {
+      BaseValidation: PHelpers.BaseValidation,
+      NotAnError: {name: 'NotAnError'},
+      NotAnErrorConstructor: function NotAnErrorConstructor(){
+      this.name = 'NotAnErrorConstructor';
+      this.message = ''
+    }
+  }
+  var rawPlugin = PHelpers.completePlugin('test-4', false, false, errs)
+  var plugin = new RawPlugin(rawPlugin, instanceObjects.FrameworkOptions.layers)
+
   var errorBase = new PluginBase(plugin, {}, instanceObjects);
   t.ok(errorBase.errors.BaseValidation, 'Adds an Error function that inherits from the Error prototype');
   t.notOk(errorBase.errors.NotAnError, 'Does not add a plain Object');
@@ -276,99 +137,40 @@ tap.test('Config name from modulename', function(t){
 
 tap.test('Getting default and computed plugin config object with no user config provided.', function(t) {
   t.plan(1)
-  var plugin = {
-    loaded: {
-      options: {
-        host: 'localhost',
-        password: 'password'
-      },
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      errors: {
-        BaseValidation: BaseValidation,
-        NotAnError: {name: 'NotAnError'},
-        NotAnErrorConstructor: function NotAnErrorConstructor(){
-          this.name = 'NotAnErrorConstructor';
-          this.message = ''
-        }
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-2'
-  };
-
-  var configPlugin = new PluginBase(plugin, {}, instanceObjects)
+  var plugin = PHelpers.completePlugin('test-5', {host: 'localhost', password: 'password'})
+  var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
+  var configPlugin = new PluginBase(rawPlugin, {}, instanceObjects)
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig()
   t.deepEqual(defaultOpts, computedOpts, 'Default and computed Options match with no provided config.')
 });
 
-tap.test('Getting default and computed plugin config object with no user config provided.', function(t) {
+tap.test('Getting default and computed plugin config object with user config provided.', function(t) {
   t.plan(4)
-  var plugin = {
-    loaded: {
-      options: {
-        host: 'localhost',
-        password: 'password'
-      },
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      errors: {
-        BaseValidation: BaseValidation,
-        NotAnError: {name: 'NotAnError'},
-        NotAnErrorConstructor: function NotAnErrorConstructor(){
-          this.name = 'NotAnErrorConstructor';
-          this.message = ''
-        }
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-2'
-  };
+  var plugin = PHelpers.completePlugin('test-5', {host: 'localhost', password: 'password'})
+  var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
+  var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)
 
-  var configPlugin = new PluginBase(plugin, {test_2: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects);
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
-  t.equal(defaultOpts['test_2'].host, 'localhost', 'Default option value "host" unchanged.');
-  t.equal(defaultOpts['test_2'].password, 'password', 'Default option value "password" unchanged.');
-  t.equal(computedOpts['test_2'].host, '192.168.1.100', 'Computed option value "host" correct.');
-  t.equal(computedOpts['test_2'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
+  t.equal(defaultOpts['test_5'].host, 'localhost', 'Default option value "host" unchanged.');
+  t.equal(defaultOpts['test_5'].password, 'password', 'Default option value "password" unchanged.');
+  t.equal(computedOpts['test_5'].host, '192.168.1.100', 'Computed option value "host" correct.');
+  t.equal(computedOpts['test_5'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
 });
 
 tap.test('Default and computed plugin configs return false if not present',function(t) {
   t.plan(2)
-  var plugin = {
-    loaded: {
-      metadata: {
-        name: 'Unit',
-        layer: 'core',
-        type: 'service'
-      },
-      errors: {
-        BaseValidation: BaseValidation,
-        NotAnError: {name: 'NotAnError'},
-        NotAnErrorConstructor: function NotAnErrorConstructor(){
-          this.name = 'NotAnErrorConstructor';
-          this.message = ''
-        }
-      },
-      plugin: {load: load, start: isDone, stop: isDone}
-    },
-    moduleName: 'test-2'
-  };
+  var plugin = PHelpers.completePlugin('test-5', {})
 
-  var configPlugin = new PluginBase(plugin, {test_2: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects);
+  var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
+  var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
   t.equal(defaultOpts, false, 'Default options are false.');
   t.equal(computedOpts, false, 'Computed options are false.');
 })
+
 
 function load(injector, loaded){return loaded(null, {ok: true})}
 function isDone(done) {

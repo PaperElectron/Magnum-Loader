@@ -20,14 +20,17 @@ var pluginOptions = {
   test_a: {
     host: 'localhost',
     port: 3006
+  },
+  multipleConfig: {
+    MultipleConfig1: {setName: 'setExternally'}
   }
 };
 var loaderOptions = {
   prefix: 'magnum',
   layers: ['core', 'data', 'dependency', 'platform'],
   logger: mockConsole,
-  parentDirectory: path.join(__dirname, '../'),
-  pluginDirectory: path.join(__dirname, '../', '/plugins'),
+  parentDirectory: path.join(__dirname, '../mocks'),
+  pluginDirectory: path.join(__dirname, '../', '/mocks/internalPlugins'),
 };
 
 var pkgJson = {
@@ -45,12 +48,12 @@ mockery.enable({
   warnOnUnregistered: false
 });
 
-mockery.registerSubstitute('magnum-test-a', '../mocks/plugins/magnum-test-a');
-mockery.registerSubstitute('magnum-test-b', '../mocks/plugins/magnum-test-b');
-mockery.registerSubstitute('magnum-test-c', '../mocks/plugins/magnum-test-c');
-mockery.registerSubstitute('magnum-test-d', '../mocks/plugins/magnum-test-d');
-mockery.registerSubstitute('magnum-test-e', '../mocks/plugins/magnum-test-e');
-mockery.registerSubstitute('magnum-test-f', '../mocks/plugins/magnum-test-f');
+mockery.registerSubstitute('magnum-test-a', '../mocks/externalPlugins/magnum-test-a');
+mockery.registerSubstitute('magnum-test-b', '../mocks/externalPlugins/magnum-test-b');
+mockery.registerSubstitute('magnum-test-c', '../mocks/externalPlugins/magnum-test-c');
+mockery.registerSubstitute('magnum-test-d', '../mocks/externalPlugins/magnum-test-d');
+mockery.registerSubstitute('magnum-test-e', '../mocks/externalPlugins/magnum-test-e');
+mockery.registerSubstitute('magnum-test-f', '../mocks/externalPlugins/magnum-test-f');
 
 var LoadIndex = require('../../index');
 var Loader = LoadIndex(pkgJson, loaderOptions, pluginOptions);
@@ -79,7 +82,7 @@ tap.test('Loading plugins', function(t){
   t.plan(6);
   var core = Loader.getLoaded('core');
   t.type(core, Array, 'Core returned Array');
-  t.equal(core.length, 6, 'Has 6 loaded core plugins.');
+  t.equal(core.length, 8, 'Has 8 loaded core plugins.');
 
   var dependency = Loader.getLoaded('dependency');
   t.type(dependency, Array, 'Dependency returned Array');
@@ -104,8 +107,8 @@ tap.test('Adds merged Plugins', function(t){
   t.plan(3)
   var Merge = Loader.Injector.get('Merge');
   t.type(Merge, Object, 'Returned Object')
-  t.equals(Merge.first, 'first', 'Property "first" is correct');
-  t.equals(Merge.second, 'second', 'Property "second" is correct');
+  t.equal(Merge.first, 'first', 'Property "first" is correct');
+  t.equal(Merge.second, 'second', 'Property "second" is correct');
 })
 
 
@@ -124,8 +127,17 @@ tap.test('Adds Services (Objects) to the DI framework', function(t) {
   t.plan(2)
   var B = Loader.Injector.get('B');
   var BB = Loader.Injector.get('B');
-  t.equals(B.name, 'test-b', 'Has the correct Object');
-  t.equals(BB.random, B.random, 'Provides the same instance of the named dependency.')
+  t.equal(B.name, 'test-b', 'Has the correct Object');
+  t.equal(BB.random, B.random, 'Provides the same instance of the named dependency.')
+})
+
+tap.test('Correctly configures multiple plugins', function(t) {
+  t.plan(3)
+  var MultipleConfig1 = Loader.Injector.get('MultipleConfig1')
+  console.log(MultipleConfig1);
+  t.ok(MultipleConfig1, 'Returns an object.')
+  t.equal(MultipleConfig1.defaultName, 'MultipleConfig1', 'Default options value shoul remain unchanged.');
+  t.equal(MultipleConfig1.setName, 'setExternally', 'Default options value should be overwritten by config file.')
 })
 
 tap.test('Starting plugins', function(t) {
