@@ -19,11 +19,11 @@ exports.metadata = {
 exports.plugin = {
   load: function(inject, loaded) {
     setTimeout(function() {
-      var W = {name: 'W', load: {name: 'dependency-d', obj: 'W'}}
-      var D = {name: 'X', load: {name: 'dependency-d', obj: 'X'}}
-      var Y = {name: 'Y', load: {name: 'dependency-d', obj: 'Y'}}
-      var Z = {name: 'Z', load: {name: 'dependency-d', obj: 'Z'}}
-      var merge = {name: 'Merge', type: 'merge', load: {second: 'second'}}
+      var W = {param: 'W', load: {name: 'dependency-d', obj: 'W'}}
+      var D = {param: 'X', load: {name: 'dependency-d', obj: 'X'}}
+      var Y = {param: 'Y', load: {name: 'dependency-d', obj: 'Y'}}
+      var Z = {param: 'Z', load: {name: 'dependency-d', obj: 'Z'}}
+      var merge = {param: 'Merge', type: 'merge', load: {second: 'second'}}
 
       loaded(null, [W,D,Y,Z, merge])
     }, 100)

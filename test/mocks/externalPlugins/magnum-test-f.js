@@ -14,7 +14,7 @@ exports.metadata = {
   name: 'Test-F',
   "layer": "data",
   type: 'service',
-  "inject": "F"
+  "param": "F"
 }
 
 exports.plugin = {

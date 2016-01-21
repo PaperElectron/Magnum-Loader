@@ -18,7 +18,7 @@ exports.metadata = {
   name: 'Test-plugin',
   layer: 'core',
   type: 'service',
-  inject: 'Test'
+  param: 'Test'
 }
 
 exports.plugin = {

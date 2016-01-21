@@ -14,7 +14,7 @@ exports.metadata = {
   name: 'Test-B',
   "layer": "dependency",
   "type": 'service',
-  "inject": "B"
+  param: "B"
 }
 
 exports.plugin = {

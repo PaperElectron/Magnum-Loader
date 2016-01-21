@@ -24,12 +24,12 @@ var plugin;
 
 var pluginObj = {
   loaded: {
-    defaults: {},
+    options: {},
     metadata: {
       name: 'Unit',
       layer: 'core',
       type: 'service',
-      inject: 'Test'
+      param: 'Test'
     },
     plugin: {load: load, start: isDone, stop: isDone}
   },

@@ -19,7 +19,7 @@ module.exports = [
       name: 'MultipleConfig1',
       layer: 'core',
       type: 'service',
-      inject: 'MultipleConfig1'
+      param: 'MultipleConfig1'
     },
 
     plugin: {
@@ -39,7 +39,7 @@ module.exports = [
     options: {name: 'MultipleConfig2'},
     metadata: {
       name: 'MultipleConfig2',
-      inject: 'MultipleConfig2',
+      param: 'MultipleConfig2',
       type: 'none',
       layer: 'core'
     },

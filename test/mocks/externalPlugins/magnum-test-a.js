@@ -18,7 +18,7 @@ exports.options = {
 exports.metadata = {
   "name": 'Test-A',
   "layer": "core",
-  "inject": "A",
+  "param": "A",
   "type": 'factory'
 }
 

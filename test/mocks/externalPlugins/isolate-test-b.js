@@ -24,7 +24,7 @@ exports.metadata = {
 exports.plugin = {
   load: function(inject, loaded) {
     loaded(null, [
-      {name: 'B', type: 'service', load: {}}
+      {param: 'B', type: 'service', load: {}}
     ])
   },
   start: function(done) {

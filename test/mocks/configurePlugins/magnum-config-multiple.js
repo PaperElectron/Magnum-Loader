@@ -9,7 +9,7 @@ module.exports = [
       name: 'ConfigCore',
       type: 'service',
       layer: 'core',
-      inject: 'ConfCore'
+      param: 'ConfCore'
     },
     plugin: {
       load: function(injector, loaded){
@@ -32,7 +32,7 @@ module.exports = [
       name: 'ConfigData',
       type: 'service',
       layer: 'data',
-      inject: 'ConfData'
+      param: 'ConfData'
     },
     plugin: {
       load: function(injector, loaded){
@@ -55,7 +55,7 @@ module.exports = [
       name: 'ConfigDependency',
       type: 'service',
       layer: 'dependency',
-      inject: 'ConfDep'
+      param: 'ConfDep'
     },
     plugin: {
       load: function(injector, loaded){
@@ -74,7 +74,7 @@ module.exports = [
       name: 'ConfigPlatform',
       type: 'service',
       layer: 'platform',
-      inject: 'ConfPlat'
+      param: 'ConfPlat'
     },
     plugin: {
       load: function(injector, loaded){

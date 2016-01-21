@@ -7,7 +7,7 @@ exports.options = {
 exports.metadata = {
   "name": 'ConfigSingle',
   "layer": "core",
-  "inject": "Single",
+  "param": "Single",
   "type": 'service'
 }
 

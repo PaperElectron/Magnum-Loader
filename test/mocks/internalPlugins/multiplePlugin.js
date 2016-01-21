@@ -17,7 +17,7 @@ module.exports = [
       name: 'MultiplePlugin',
       layer: 'core',
       type: 'service',
-      inject: 'Multiple'
+      param: 'Multiple'
     },
 
     plugin: {
@@ -38,7 +38,7 @@ module.exports = [
       name: 'MultiplePlugin2',
       layer: 'core',
       type: 'service',
-      inject: 'Multiple2'
+      param: 'Multiple2'
     },
 
     plugin: {
@@ -57,7 +57,7 @@ module.exports = [
   {
     metadata: {
       name: 'MultiplePlugin3',
-      inject: 'Multiple3',
+      param: 'Multiple3',
       type: 'none',
       layer: 'core'
     },

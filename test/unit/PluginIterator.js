@@ -110,8 +110,6 @@ tap.test('Iterator build plugin configs', function(t) {
   t.plan(2)
   var defaults = iteratorInst.getPluginConfigs({stringify: false, defaults: true});
   var computed = iteratorInst.getPluginConfigs({stringify: false, defaults: false});
-  console.log(defaults);
-  console.log(computed);
   t.ok(defaults)
   t.ok(computed)
 });
@@ -129,7 +127,7 @@ function makePlugin(moduleName) {
       {
         loaded: {
           options: {name: moduleName},
-          metadata: {name: moduleName, layer: 'core', type: 'service', inject: moduleName.replace('-', '_')},
+          metadata: {name: moduleName, layer: 'core', type: 'service', param: moduleName.replace('-', '_')},
           plugin: {
             load: function(inject, loaded) {
               loaded(null, {name: moduleName})
