@@ -17,6 +17,9 @@ var mockConsole = {
 };
 
 var pluginOptions = {
+  test_g: {
+    disabled: true
+  },
   test_a: {
     host: 'localhost',
     port: 3006
@@ -39,7 +42,8 @@ var pkgJson = {
     "magnum-test-b": "0.0.0",
     "magnum-test-c": "0.0.0",
     "magnum-test-e": "0.0.0",
-    "magnum-test-f": "0.0.0"
+    "magnum-test-f": "0.0.0",
+    "magnum-test-g": "0.0.0"
   }
 };
 
@@ -54,6 +58,7 @@ mockery.registerSubstitute('magnum-test-c', '../mocks/externalPlugins/magnum-tes
 mockery.registerSubstitute('magnum-test-d', '../mocks/externalPlugins/magnum-test-d');
 mockery.registerSubstitute('magnum-test-e', '../mocks/externalPlugins/magnum-test-e');
 mockery.registerSubstitute('magnum-test-f', '../mocks/externalPlugins/magnum-test-f');
+mockery.registerSubstitute('magnum-test-g', '../mocks/externalPlugins/magnum-test-g');
 
 var LoadIndex = require('../../index');
 var Loader = LoadIndex(pkgJson, loaderOptions, pluginOptions);
@@ -134,11 +139,16 @@ tap.test('Adds Services (Objects) to the DI framework', function(t) {
 tap.test('Correctly configures multiple plugins', function(t) {
   t.plan(3)
   var MultipleConfig1 = Loader.Injector.get('MultipleConfig1')
-  console.log(MultipleConfig1);
   t.ok(MultipleConfig1, 'Returns an object.')
   t.equal(MultipleConfig1.defaultName, 'MultipleConfig1', 'Default options value shoul remain unchanged.');
   t.equal(MultipleConfig1.setName, 'setExternally', 'Default options value should be overwritten by config file.')
 })
+
+tap.test('Plugin Test_g should be disabled from config setting', function(t){
+  t.plan(1)
+  var G = Loader.Injector.get('G')
+  t.notOk(G, 'Test_g should not have loaded a dependency.')
+});
 
 tap.test('Starting plugins', function(t) {
   Loader.on('start', function(){

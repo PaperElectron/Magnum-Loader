@@ -43,7 +43,6 @@ tap.test('Returns with errors with modulename.', function(t) {
   t.ok(rp, 'Returns "something"');
   t.ok(rp.hasErrors(), 'Has some errors to report.');
   var errors = rp.getErrors()
-  console.log(errors);
   t.notOk(errors.moduleName, 'Returned modulename is false');
   t.equal(errors.Errors.length, 1);
   t.equal(rp.isValid(), false, 'Not a valid plugin.');

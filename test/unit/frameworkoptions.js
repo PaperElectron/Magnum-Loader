@@ -114,7 +114,6 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
     colors: true,
     logger: console
   }, Errors)
-  console.log(setPluginDir.pluginDirectory);
   t.plan(5)
   t.equal(setPluginDir.pluginDirectory, path.join(__dirname,'../','mocks/internalPlugins'), 'Sets pluginDirectory correctly')
   t.equal(falseColorVerbose.verbose, false, 'options.verbose: false');

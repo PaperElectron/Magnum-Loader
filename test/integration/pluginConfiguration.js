@@ -22,6 +22,7 @@ var pluginOptions = {
   },
   config_multiple: {
     ConfigCore: {
+      disable: 1,
       setValue: 'isSet'
     },
     ConfigData: {

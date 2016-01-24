@@ -15,6 +15,7 @@ var Errors = require('./lib/Errors');
 var AppendLogger = require('./lib/LoggerBuilder');
 var _ = require('lodash');
 
+
 /**
  * Bit of boilerplate to setup things that are used everywhere.
  * MagnumLoader Object itself is a fairly complex facade that spans several
@@ -62,7 +63,7 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
     Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
     process.exit()
   }
-  var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared)
+  var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared);
 
-  return MagnumLoader(iterator, Shared)
+  return MagnumLoader(iterator, Shared);
 };
