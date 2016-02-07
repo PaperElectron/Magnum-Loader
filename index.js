@@ -14,7 +14,8 @@ var OptionParser = require('./lib/FrameworkOptions');
 var Errors = require('./lib/Errors');
 var AppendLogger = require('./lib/LoggerBuilder');
 var _ = require('lodash');
-
+var Events = require('events').EventEmitter;
+var SharedEvents = new Events();
 
 /**
  * Bit of boilerplate to setup things that are used everywhere.
@@ -45,6 +46,7 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
   }
 
   var Shared = {
+    SharedEvents: SharedEvents,
     Injector: Injector,
     Loggers: Loggers,
     Output: Loggers.Output,
