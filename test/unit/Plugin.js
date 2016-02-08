@@ -45,7 +45,8 @@ var instanceObjects = {
     prefix: 'magnum',
     timeout: 2000,
     layers: ['core'],
-    parentDirectory: path.join(__dirname, '../')
+    parentDirectory: path.join(__dirname, '../'),
+    applicationDirectory: path.join(__dirname, '../')
   }
 };
 
