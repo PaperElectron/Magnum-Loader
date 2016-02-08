@@ -33,6 +33,7 @@ var loaderOptions = {
   layers: ['core', 'data', 'dependency', 'platform'],
   logger: mockConsole,
   parentDirectory: path.join(__dirname, '../mocks'),
+  applicationDirectory: path.join(__dirname, '../mocks'),
   pluginDirectory: path.join(__dirname, '../', '/mocks/internalPlugins'),
 };
 

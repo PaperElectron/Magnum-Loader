@@ -70,7 +70,6 @@ tap.test('Late Errors', function(t) {
     Loader.load();
   });
   Loader.on('error', function(err){
-    console.log(err.plugin);
     t.equal(err.message, "Im broken", 'Plugin emits an error event back up to the Loader.')
   })
 });

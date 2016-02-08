@@ -36,6 +36,7 @@ var instanceObjects = {
     timeout: 2000,
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../mocks'),
+    applicationDirectory: path.join(__dirname, '../mocks')
   }
 };
 

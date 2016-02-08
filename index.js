@@ -52,11 +52,11 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
     Output: Loggers.Output,
     FrameworkErrors: Errors,
     FrameworkOptions: FrameworkOptions,
+    ApplicationDirectory: FrameworkOptions.applicationDirectory,
     ParentDirectory: FrameworkOptions.parentDirectory,
     additionalPluginDirectory: FrameworkOptions.pluginDirectory,
     loaderPrefix: FrameworkOptions.prefix
   }
-
   try {
     var loadedPlugins = PluginFactory(pkgDependencies, pluginOpts, Shared);
   }
