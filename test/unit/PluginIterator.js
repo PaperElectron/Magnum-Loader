@@ -20,6 +20,8 @@ var RawPlugin = require('../../lib/Plugin/RawPlugin');
 var Plugin = require('../../lib/Plugin/Plugin');
 var path = require('path');
 
+var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
+var mockSettingsPath = path.join(__dirname, '../mocks/mockPluginSettings')
 var instanceObjects = {
   ParentDirectory: path.join(__dirname, '../'),
   Loggers: {
@@ -33,7 +35,7 @@ var instanceObjects = {
     prefix: 'magnum',
     timeout: 2000,
     layers: ['core'],
-    pluginSettings: path.join(__dirname, '../mocks/mockPluginSettings')
+    pluginSettingsDirectory: OptionValidators.findPluginSettings(mockSettingsPath)
   }
 };
 
@@ -144,7 +146,7 @@ function makePlugin(moduleName) {
         moduleName: moduleName
       };
   var plugin = new RawPlugin(pArgs, instanceObjects.FrameworkOptions.layers)
-  return new Plugin(plugin, {}, Shared)
+  return new Plugin(plugin, Shared)
 }
 
 function mockConsole(){

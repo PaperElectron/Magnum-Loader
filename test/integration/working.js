@@ -35,7 +35,7 @@ var loaderOptions = {
   parentDirectory: path.join(__dirname, '../mocks'),
   applicationDirectory: path.join(__dirname, '../mocks'),
   pluginDirectory: path.join(__dirname, '../', '/mocks/internalPlugins'),
-  pluginOptions: path.join(__dirname, '../mocks/mockPluginSettings')
+  pluginSettingsDirectory: path.join(__dirname, '../mocks/mockPluginSettings')
 };
 
 var pkgJson = {
@@ -63,7 +63,7 @@ mockery.registerSubstitute('magnum-test-f', '../mocks/externalPlugins/magnum-tes
 mockery.registerSubstitute('magnum-test-g', '../mocks/externalPlugins/magnum-test-g');
 
 var LoadIndex = require('../../index');
-var Loader = LoadIndex(pkgJson, loaderOptions, pluginOptions);
+var Loader = LoadIndex(pkgJson, loaderOptions);
 
 tap.test('Instantiation', function(t){
   t.plan(1);

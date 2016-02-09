@@ -38,7 +38,7 @@ var loaderOptions = {
   layers: ['core', 'data', 'dependency', 'platform'],
   logger: mockConsole,
   parentDirectory: path.join(__dirname, '../mocks'),
-  pluginOptions: path.join(__dirname, '../mocks/mockPluginSettings')
+  pluginSettingsDirectory: path.join(__dirname, '../mocks/mockPluginSettings')
 };
 
 var pkgJson = {

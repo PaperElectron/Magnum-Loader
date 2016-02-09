@@ -27,7 +27,7 @@ var SharedEvents = new Events();
  * @param pluginOpts
  * @returns {MagnumLoader}
  */
-module.exports = function(pkgJson, frameworkOpts, pluginOpts){
+module.exports = function(pkgJson, frameworkOpts){
 
   var FrameworkOptions = OptionParser(frameworkOpts, Errors);
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
@@ -52,14 +52,15 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
     Output: Loggers.Output,
     FrameworkErrors: Errors,
     FrameworkOptions: FrameworkOptions,
-    ApplicationDirectory: FrameworkOptions.applicationDirectory,
+
+    applicationDirectory: FrameworkOptions.applicationDirectory,
     ParentDirectory: FrameworkOptions.parentDirectory,
     additionalPluginDirectory: FrameworkOptions.pluginDirectory,
-    pluginSettings: FrameworkOptions.pluginSettings,
+    pluginSettingsDirectory: FrameworkOptions.pluginSettingsDirectory,
     loaderPrefix: FrameworkOptions.prefix
   }
   try {
-    var loadedPlugins = PluginFactory(pkgDependencies, pluginOpts, Shared);
+    var loadedPlugins = PluginFactory(pkgDependencies, Shared);
   }
   catch(err){
     Shared.Loggers.FrameworkLogger.error(err.message)

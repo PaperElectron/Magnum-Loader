@@ -41,7 +41,7 @@ var instanceObjects = {
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../mocks'),
     applicationDirectory: path.join(__dirname, '../mocks'),
-    pluginSettings: OptionValidators.findPluginSettings(mockSettingsPath)
+    pluginSettingsDirectory: OptionValidators.findPluginSettings(mockSettingsPath)
   }
 };
 
@@ -59,7 +59,7 @@ tap.test('PluginBase module handles correct arguments.', function(t) {
   var plugin = PHelpers.completePlugin('Unit');
   var rp = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
   function noThrow(){
-    pBase = new PluginBase(rp, {}, instanceObjects)
+    pBase = new PluginBase(rp, instanceObjects)
   }
   t.doesNotThrow(noThrow, 'Throws no errors');
   t.ok(pBase, 'Plugin base exists');
@@ -72,7 +72,7 @@ tap.test('Produces an invalid plugin when workDir is a file', function(t){
 
   var rawPlugin1 = PHelpers.completePlugin('test-2', {workDir:'mockWorkDir/.gitkeep'})
   var plugin = new RawPlugin(rawPlugin1, instanceObjects.FrameworkOptions.layers)
-  var bp1 = new PluginBase(plugin, {}, instanceObjects)
+  var bp1 = new PluginBase(plugin, instanceObjects)
   t.ok(bp1, 'PluginBase Created')
   t.equal(bp1.Errors.length, 1, 'Has the correct Errors length')
   t.notOk(bp1.valid, 'Not a valid PluginBase')
@@ -83,7 +83,7 @@ tap.test('Produces an invalid plugin when workDir does not exist.', function(t) 
 
   var rawPlugin3 = PHelpers.completePlugin('test-3', {workDir:'mockWorkDerp'})
   var plugin = new RawPlugin(rawPlugin3, instanceObjects.FrameworkOptions.layers)
-  var bp3 = new PluginBase(plugin, {}, instanceObjects)
+  var bp3 = new PluginBase(plugin, instanceObjects)
   t.ok(bp3, 'PluginBase Created')
   t.ok(bp3.hasErrors(), 'hasErrors returns true');
   t.equal(bp3.getErrors().moduleName, 'test-3')
@@ -95,7 +95,7 @@ tap.test('Computes workDir absolute path correctly when workDir is a directory.'
   t.plan(2)
   var rawPlugin2 = PHelpers.completePlugin('test-4', {workDir:'mockWorkDir'})
   var plugin = new RawPlugin(rawPlugin2, instanceObjects.FrameworkOptions.layers)
-  var bp2 = new PluginBase(plugin, {}, instanceObjects)
+  var bp2 = new PluginBase(plugin, instanceObjects)
   t.ok(bp2, 'PluginBase Created')
 
   var computedPath = bp2.computedOptions.workDir;
@@ -126,7 +126,7 @@ tap.test('Validates custom error objects exported by a plugin.', function(t) {
   }
   var rawPlugin = PHelpers.completePlugin('test-5', false, false, errs)
   var plugin = new RawPlugin(rawPlugin, instanceObjects.FrameworkOptions.layers);
-  var errorBase = new PluginBase(plugin, {}, instanceObjects);
+  var errorBase = new PluginBase(plugin, instanceObjects);
 
   t.ok(errorBase.errors.BaseValidation, 'Adds an Error function that inherits from the Error prototype');
   t.notOk(errorBase.errors.NotAnError, 'Does not add a plain Object');
@@ -145,7 +145,7 @@ tap.test('Getting default and computed plugin config object with no user config 
   t.plan(1)
   var plugin = PHelpers.completePlugin('test-6', {host: 'localhost', password: 'password'})
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
-  var configPlugin = new PluginBase(rawPlugin, {}, instanceObjects)
+  var configPlugin = new PluginBase(rawPlugin, instanceObjects)
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig()
   t.deepEqual(defaultOpts, computedOpts, 'Default and computed Options match with no provided config.')
@@ -155,7 +155,7 @@ tap.test('Getting default and computed plugin config object with user config pro
   t.plan(4)
   var plugin = PHelpers.completePlugin('test-7', {host: 'localhost', password: 'password'})
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
-  var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)
+  var configPlugin = new PluginBase(rawPlugin, instanceObjects)
 
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
@@ -170,7 +170,7 @@ tap.test('Default and computed plugin configs return false if not present',funct
   var plugin = PHelpers.completePlugin('test-8', {})
 
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
-  var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)
+  var configPlugin = new PluginBase(rawPlugin, instanceObjects)
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
   t.equal(defaultOpts, false, 'Default options are false.');

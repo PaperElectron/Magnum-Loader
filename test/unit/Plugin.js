@@ -51,7 +51,7 @@ var instanceObjects = {
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../'),
     applicationDirectory: path.join(__dirname, '../'),
-    pluginSettings: OptionValidators.findPluginSettings(mockSettingsPath)
+    pluginSettingsDirectory: OptionValidators.findPluginSettings(mockSettingsPath)
   }
 };
 
@@ -63,7 +63,7 @@ tap.test('Plugin module instantiates with correct args', function(t) {
   function noThrow(){
     try {
      var rawPlugin = new RawPlugin(pluginObj, instanceObjects.FrameworkOptions.layers);
-     plugin = new Plugin(rawPlugin, {}, instanceObjects)
+     plugin = new Plugin(rawPlugin, instanceObjects)
     }
     catch(e){
       console.log(e.stack);

@@ -48,6 +48,7 @@ var loaderOptions = {
   colors: false,
   parentDirectory: path.join(__dirname, '../mocks'),
   pluginDirectory: path.join(__dirname, '../', '/mocks/lateErrors'),
+  pluginSettingsDirectory: path.join(__dirname, '../mocks/mockPluginSettings')
 };
 
 var pkgJson = {
