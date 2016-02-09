@@ -8,6 +8,7 @@
 "use strict";
 
 var tap = require('tap');
+var _ = require('lodash');
 var mockery = require('mockery');
 var path = require('path');
 var util = require('util');
@@ -15,7 +16,8 @@ var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var PluginBase = require(path.join(__dirname, '../../', 'lib/Plugin/PluginBase'));
 var PHelpers = require('../helpers/PluginHelpers');
 var injector = require('magnum-di');
-
+var fs = require('fs');
+var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
 
 mockery.enable({
   useCleanCache: true,
@@ -27,6 +29,8 @@ var pin_Missing = {
   }
 };
 
+var mockSettingsPath = path.join(__dirname, '../mocks/mockPluginSettings')
+injector.service('Environment', process.env);
 var instanceObjects = {
   Logger: console,
   Injector: injector,
@@ -36,7 +40,8 @@ var instanceObjects = {
     timeout: 2000,
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../mocks'),
-    applicationDirectory: path.join(__dirname, '../mocks')
+    applicationDirectory: path.join(__dirname, '../mocks'),
+    pluginSettings: OptionValidators.findPluginSettings(mockSettingsPath)
   }
 };
 
@@ -88,7 +93,7 @@ tap.test('Produces an invalid plugin when workDir does not exist.', function(t) 
 
 tap.test('Computes workDir absolute path correctly when workDir is a directory.', function(t){
   t.plan(2)
-  var rawPlugin2 = PHelpers.completePlugin('test-3', {workDir:'mockWorkDir'})
+  var rawPlugin2 = PHelpers.completePlugin('test-4', {workDir:'mockWorkDir'})
   var plugin = new RawPlugin(rawPlugin2, instanceObjects.FrameworkOptions.layers)
   var bp2 = new PluginBase(plugin, {}, instanceObjects)
   t.ok(bp2, 'PluginBase Created')
@@ -119,10 +124,10 @@ tap.test('Validates custom error objects exported by a plugin.', function(t) {
       this.message = ''
     }
   }
-  var rawPlugin = PHelpers.completePlugin('test-4', false, false, errs)
-  var plugin = new RawPlugin(rawPlugin, instanceObjects.FrameworkOptions.layers)
-
+  var rawPlugin = PHelpers.completePlugin('test-5', false, false, errs)
+  var plugin = new RawPlugin(rawPlugin, instanceObjects.FrameworkOptions.layers);
   var errorBase = new PluginBase(plugin, {}, instanceObjects);
+
   t.ok(errorBase.errors.BaseValidation, 'Adds an Error function that inherits from the Error prototype');
   t.notOk(errorBase.errors.NotAnError, 'Does not add a plain Object');
   t.notOk(errorBase.errors.NotAnErrorConstructor, 'Does not add a constructor not inheriting from Error');
@@ -138,7 +143,7 @@ tap.test('Config name from modulename', function(t){
 
 tap.test('Getting default and computed plugin config object with no user config provided.', function(t) {
   t.plan(1)
-  var plugin = PHelpers.completePlugin('test-5', {host: 'localhost', password: 'password'})
+  var plugin = PHelpers.completePlugin('test-6', {host: 'localhost', password: 'password'})
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
   var configPlugin = new PluginBase(rawPlugin, {}, instanceObjects)
   var defaultOpts = configPlugin.getDefaultConfig();
@@ -148,21 +153,21 @@ tap.test('Getting default and computed plugin config object with no user config 
 
 tap.test('Getting default and computed plugin config object with user config provided.', function(t) {
   t.plan(4)
-  var plugin = PHelpers.completePlugin('test-5', {host: 'localhost', password: 'password'})
+  var plugin = PHelpers.completePlugin('test-7', {host: 'localhost', password: 'password'})
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
   var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)
 
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
-  t.equal(defaultOpts['test_5'].host, 'localhost', 'Default option value "host" unchanged.');
-  t.equal(defaultOpts['test_5'].password, 'password', 'Default option value "password" unchanged.');
-  t.equal(computedOpts['test_5'].host, '192.168.1.100', 'Computed option value "host" correct.');
-  t.equal(computedOpts['test_5'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
+  t.equal(defaultOpts['test_7'].host, 'localhost', 'Default option value "host" unchanged.');
+  t.equal(defaultOpts['test_7'].password, 'password', 'Default option value "password" unchanged.');
+  t.equal(computedOpts['test_7'].host, '192.168.1.100', 'Computed option value "host" correct.');
+  t.equal(computedOpts['test_7'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
 });
 
 tap.test('Default and computed plugin configs return false if not present',function(t) {
   t.plan(2)
-  var plugin = PHelpers.completePlugin('test-5', {})
+  var plugin = PHelpers.completePlugin('test-8', {})
 
   var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
   var configPlugin = new PluginBase(rawPlugin, {test_5: {host: '192.168.1.100', password: 'P@@$W0rD'}}, instanceObjects)

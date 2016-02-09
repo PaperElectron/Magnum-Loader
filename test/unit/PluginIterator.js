@@ -32,7 +32,8 @@ var instanceObjects = {
   FrameworkOptions: {
     prefix: 'magnum',
     timeout: 2000,
-    layers: ['core']
+    layers: ['core'],
+    pluginSettings: path.join(__dirname, '../mocks/mockPluginSettings')
   }
 };
 

@@ -55,6 +55,7 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
     ApplicationDirectory: FrameworkOptions.applicationDirectory,
     ParentDirectory: FrameworkOptions.parentDirectory,
     additionalPluginDirectory: FrameworkOptions.pluginDirectory,
+    pluginSettings: FrameworkOptions.pluginSettings,
     loaderPrefix: FrameworkOptions.prefix
   }
   try {
@@ -65,6 +66,7 @@ module.exports = function(pkgJson, frameworkOpts, pluginOpts){
     Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
     process.exit()
   }
+
   var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared);
 
   return MagnumLoader(iterator, Shared);

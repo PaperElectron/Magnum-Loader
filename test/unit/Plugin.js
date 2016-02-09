@@ -14,6 +14,7 @@ var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin/Plugin'));
 var Errors = require(path.join(__dirname, '../../', 'lib/Errors'));
 var injector = require('magnum-di');
+var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
 
 mockery.enable({
   useCleanCache: true,
@@ -36,6 +37,9 @@ var pluginObj = {
   moduleName: 'instantiation-test'
 };
 
+var mockSettingsPath = path.join(__dirname, '../mocks/mockPluginSettings')
+injector.service('Environment', process.env);
+
 var instanceObjects = {
   Logger: console,
   Injector: injector,
@@ -46,7 +50,8 @@ var instanceObjects = {
     timeout: 2000,
     layers: ['core'],
     parentDirectory: path.join(__dirname, '../'),
-    applicationDirectory: path.join(__dirname, '../')
+    applicationDirectory: path.join(__dirname, '../'),
+    pluginSettings: OptionValidators.findPluginSettings(mockSettingsPath)
   }
 };
 

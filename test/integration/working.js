@@ -35,6 +35,7 @@ var loaderOptions = {
   parentDirectory: path.join(__dirname, '../mocks'),
   applicationDirectory: path.join(__dirname, '../mocks'),
   pluginDirectory: path.join(__dirname, '../', '/mocks/internalPlugins'),
+  pluginOptions: path.join(__dirname, '../mocks/mockPluginSettings')
 };
 
 var pkgJson = {

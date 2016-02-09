@@ -28,6 +28,7 @@ exports.completePlugin = function(moduleName, options, meta, errors){
   options = options || {name: moduleName}
   meta = meta || {name: 'Test_Plugin', layer: 'core', type: 'service'}
   errors = errors || {}
+
   return {
     moduleName: moduleName,
     loaded: {

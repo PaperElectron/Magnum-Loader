@@ -76,9 +76,10 @@ tap.test('Parses Raw framework options correctly and sets defaults', function(t)
     parentDirectory: __dirname,
     logger: console
   }, Errors)
-  t.plan(7)
+  t.plan(8)
   t.equal(GoodOpts.prefix, 'magnum');
-  t.equal(GoodOpts.layers[0], 'core');
+  t.equal(GoodOpts.layers[0], 'system');
+  t.equal(GoodOpts.layers[1], 'core');
   t.equal(GoodOpts.parentDirectory, __dirname);
   t.equal(GoodOpts.applicationDirectory, __dirname);
   t.equal(GoodOpts.pluginDirectory, false);

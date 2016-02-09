@@ -8,11 +8,16 @@
 var tap = require('tap');
 var Errors = require('../../lib/Errors');
 
+tap.test('InvalidPluginsError', function(t){
+  t.plan(2);
+  var err = new Errors.InvalidPluginsError('You have some invalid plugins');
+  t.equal(err.message, 'You have some invalid plugins', 'Has correct message');
+  t.equal(err.name, 'InvalidPluginsError', 'Is correct type')
+});
 
 tap.test('OptionsError', function(t){
   t.plan(2);
   var err = new Errors.OptionsError('Options are not good.');
-
   t.equal(err.message, 'Options are not good.', 'Has correct message');
   t.equal(err.name, 'OptionsError', 'Is correct type')
 });
