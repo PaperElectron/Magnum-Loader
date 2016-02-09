@@ -12,7 +12,7 @@
  * @module multipleConfig
  */
 
-module.exports.multipleConfig = {
+module.exports.MultipleConfig = {
   MultipleConfig1: {
     setName: 'setExternally'
   }

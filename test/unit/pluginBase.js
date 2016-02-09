@@ -159,10 +159,10 @@ tap.test('Getting default and computed plugin config object with user config pro
 
   var defaultOpts = configPlugin.getDefaultConfig();
   var computedOpts = configPlugin.getComputedConfig();
-  t.equal(defaultOpts['test_7'].host, 'localhost', 'Default option value "host" unchanged.');
-  t.equal(defaultOpts['test_7'].password, 'password', 'Default option value "password" unchanged.');
-  t.equal(computedOpts['test_7'].host, '192.168.1.100', 'Computed option value "host" correct.');
-  t.equal(computedOpts['test_7'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
+  t.equal(defaultOpts['Test7'].host, 'localhost', 'Default option value "host" unchanged.');
+  t.equal(defaultOpts['Test7'].password, 'password', 'Default option value "password" unchanged.');
+  t.equal(computedOpts['Test7'].host, '192.168.1.100', 'Computed option value "host" correct.');
+  t.equal(computedOpts['Test7'].password, 'P@@$W0rD', 'Computed option value "password" correct.')
 });
 
 tap.test('Default and computed plugin configs return false if not present',function(t) {

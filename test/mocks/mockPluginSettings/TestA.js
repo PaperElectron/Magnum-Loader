@@ -12,7 +12,7 @@
  * @module test_a
  */
 
-module.exports.test_a = {
+module.exports.TestA = {
   host: 'localhost',
   port: 3006
 }

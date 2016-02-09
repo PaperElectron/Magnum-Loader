@@ -12,7 +12,7 @@
  * @module config_multiple
  */
 
-module.exports.config_multiple = {
+module.exports.ConfigMultiple = {
   ConfigCore: {
     disable: 1,
     setValue: 'isSet'

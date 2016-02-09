@@ -74,7 +74,7 @@ var Loader = LoadIndex(pkgJson, loaderOptions, pluginOptions);
 tap.test('Load event', function(t) {
   t.plan(2);
   Loader.on('ready', function(){
-    toTest = makeTest(t, 'magnum: hookThrows Encountered error while loading. ** this_throws is not defined');
+    toTest = makeTest(t, 'magnum: HookThrows Encountered error while loading. ** this_throws is not defined');
     Loader.load();
   });
   Loader.on('error', function(err){

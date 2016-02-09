@@ -146,10 +146,10 @@ tap.test('Correctly configures multiple plugins', function(t) {
   t.equal(MultipleConfig1.setName, 'setExternally', 'Default options value should be overwritten by config file.')
 })
 
-tap.test('Plugin Test_g should be disabled from config setting', function(t){
+tap.test('Plugin TestG should be disabled from config setting', function(t){
   t.plan(1)
   var G = Loader.Injector.get('G')
-  t.notOk(G, 'Test_g should not have loaded a dependency.')
+  t.notOk(G, 'TestG should not have loaded a dependency.')
 });
 
 tap.test('Starting plugins', function(t) {
@@ -162,7 +162,7 @@ tap.test('Starting plugins', function(t) {
 
 tap.test('Stopping plugins',{timeout: 3000}, function(t){
   Loader.on('error', function(err){
-    t.equals(err.message, 'Timeout exceeded (2000ms) attempting to stop test_c')
+    t.equals(err.message, 'Timeout exceeded (2000ms) attempting to stop TestC')
   })
   Loader.on('stop', function(){
     t.end()

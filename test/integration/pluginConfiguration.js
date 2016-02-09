@@ -69,18 +69,18 @@ tap.test('Gets Default plugin configuration', function(t) {
   t.plan(4)
   var defaults = Loader.getPluginConfigs({defaults: true})
   t.ok(defaults, 'Returned default configs.')
-  t.equal(defaults.config_single.setValue, 'SetConfigSingle', 'Returns default config for single plugin correctly.');
-  t.equal(defaults.config_multiple.ConfigCore.setValue, 'SetConfigCore', 'Returns default config for multiple correctly')
-  t.equal(defaults.config_multiple.ConfigData.setValue, 'SetConfigData', 'Returns default config for multiple plugin correctly')
+  t.equal(defaults.ConfigSingle.setValue, 'SetConfigSingle', 'Returns default config for single plugin correctly.');
+  t.equal(defaults.ConfigMultiple.ConfigCore.setValue, 'SetConfigCore', 'Returns default config for multiple correctly')
+  t.equal(defaults.ConfigMultiple.ConfigData.setValue, 'SetConfigData', 'Returns default config for multiple plugin correctly')
 })
 
 tap.test('Gets Computed plugin configuration', function(t) {
   t.plan(4)
   var computed = Loader.getPluginConfigs()
   t.ok(computed, 'Returned computed configs')
-  t.equal(computed.config_single.setValue, 'isSet', 'Returns computed config for single plugin correctly.');
-  t.equal(computed.config_multiple.ConfigCore.setValue, 'isSet', 'Returns computed config for multiple correctly');
-  t.equal(computed.config_multiple.ConfigData.setValue, 'isSet', 'Returns computed config for multiple plugin correctly');
+  t.equal(computed.ConfigSingle.setValue, 'isSet', 'Returns computed config for single plugin correctly.');
+  t.equal(computed.ConfigMultiple.ConfigCore.setValue, 'isSet', 'Returns computed config for multiple correctly');
+  t.equal(computed.ConfigMultiple.ConfigData.setValue, 'isSet', 'Returns computed config for multiple plugin correctly');
 })
 
 tap.test('Loads Plugins with no errors', function(t){

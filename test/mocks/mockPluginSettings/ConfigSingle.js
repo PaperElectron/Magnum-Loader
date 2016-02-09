@@ -1,5 +1,5 @@
 /**
- * @file test_g
+ * @file config_single
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -9,9 +9,10 @@
 
 /**
  *
- * @module test_g
+ * @module config_single
  */
 
-module.exports.test_g = {
-  disabled: true
+module.exports.ConfigSingle = {
+  defaultValue: 'ConfigSingle',
+  setValue: 'isSet'
 }
