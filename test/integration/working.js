@@ -142,7 +142,7 @@ tap.test('Correctly configures multiple plugins', function(t) {
   t.plan(3)
   var MultipleConfig1 = Loader.Injector.get('MultipleConfig1')
   t.ok(MultipleConfig1, 'Returns an object.')
-  t.equal(MultipleConfig1.defaultName, 'MultipleConfig1', 'Default options value shoul remain unchanged.');
+  t.equal(MultipleConfig1.defaultName, 'MultipleConfig1', 'Default options value should remain unchanged.');
   t.equal(MultipleConfig1.setName, 'setExternally', 'Default options value should be overwritten by config file.')
 })
 
