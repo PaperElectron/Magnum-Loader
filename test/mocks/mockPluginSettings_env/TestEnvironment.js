@@ -1,5 +1,5 @@
 /**
- * @file Unit
+ * @file TestEnvironment
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -9,11 +9,11 @@
 
 /**
  *
- * @module Unit
+ * @module TestEnvironment
  */
 
-exports.Unit = function(Environment){
+module.exports.TestEnvironment = function(Environment){
   return {
-    name: 'Bob'
+    port: Environment.PORT
   }
 }

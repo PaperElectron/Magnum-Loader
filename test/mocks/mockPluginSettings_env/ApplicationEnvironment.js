@@ -1,5 +1,5 @@
 /**
- * @file Unit
+ * @file ApplicationEnvironment
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -9,11 +9,10 @@
 
 /**
  *
- * @module Unit
+ * @module ApplicationEnvironment
  */
 
-exports.Unit = function(Environment){
-  return {
-    name: 'Bob'
-  }
-}
+
+exports.ApplicationEnvironment = {
+    checkExistence: ['PORT']
+};
