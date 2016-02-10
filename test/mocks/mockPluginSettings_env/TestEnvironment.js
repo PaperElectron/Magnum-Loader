@@ -12,8 +12,8 @@
  * @module TestEnvironment
  */
 
-module.exports.TestEnvironment = function(Environment){
+module.exports.TestEnvironment = function(Env){
   return {
-    port: Environment.PORT
+    port: Env.PORT
   }
 }

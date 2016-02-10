@@ -12,7 +12,7 @@
  * @module Unit
  */
 
-exports.Unit = function(Environment){
+exports.Unit = function(Env){
   return {
     name: 'Bob'
   }

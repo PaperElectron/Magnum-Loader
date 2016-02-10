@@ -39,7 +39,7 @@ module.exports = function(pkgJson, frameworkOpts){
   };
   Injector.service('Errors', Errors);
   Injector.service('Logger', Loggers.Logger);
-  Injector.service('Environment', process.env)
+  Injector.service('Env', process.env)
 
   var pkgDependencies = _.keys(pkgJson.dependencies)
   if(!pkgDependencies){
