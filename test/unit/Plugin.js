@@ -13,7 +13,7 @@ var path = require('path');
 var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var Plugin = require(path.join(__dirname, '../../', 'lib/Plugin/Plugin'));
 var Errors = require(path.join(__dirname, '../../', 'lib/Errors'));
-var injector = require('magnum-di');
+var injector = require('magnum-di')();
 var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
 
 mockery.enable({

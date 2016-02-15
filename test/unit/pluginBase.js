@@ -15,7 +15,7 @@ var util = require('util');
 var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
 var PluginBase = require(path.join(__dirname, '../../', 'lib/Plugin/PluginBase'));
 var PHelpers = require('../helpers/PluginHelpers');
-var injector = require('magnum-di');
+var injector = require('magnum-di')();
 var fs = require('fs');
 var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
 

@@ -10,7 +10,7 @@ var mockery = require('mockery');
 var path = require('path');
 var Dependency = require(path.join(__dirname, '../../', 'lib/Plugin/Dependency'));
 var Errors = require(path.join(__dirname, '../../', 'lib/Errors'));
-var injector = require('magnum-di');
+var injector = require('magnum-di')();
 
 
 mockery.enable({
