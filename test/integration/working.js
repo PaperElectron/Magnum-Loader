@@ -93,7 +93,7 @@ tap.test('Loading plugins', function(t){
 
   var dependency = Loader.getLoaded('dependency');
   t.type(dependency, Array, 'Dependency returned Array');
-  t.equal(dependency.length, 1, 'Has 1 loaded dependency plugin.');
+  t.equal(dependency.length, 2, 'Has 2 loaded dependency plugin.');
 
   var platform = Loader.getLoaded('platform');
   t.type(platform, Array, 'Platform returned Array');
@@ -150,6 +150,13 @@ tap.test('Plugin TestG should be disabled from config setting', function(t){
   t.plan(1)
   var G = Loader.Injector.get('G')
   t.notOk(G, 'TestG should not have loaded a dependency.')
+});
+
+tap.test('Plugins have access to the injector object inside the load hook.', function(t) {
+  t.plan(2)
+  var UseInjector = Loader.Injector.get('InjectorTest');
+  t.ok(UseInjector.Injected, 'Plugin returned its dependency correctly.');
+  t.equal(UseInjector.Injected.name, 'Test', 'Injected function returned correct value');
 });
 
 tap.test('Starting plugins', function(t) {
