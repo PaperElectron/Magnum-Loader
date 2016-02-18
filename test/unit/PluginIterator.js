@@ -13,7 +13,7 @@ mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
 });
-var injector = require('magnum-di');
+var injector = require('magnum-di')();
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
 var RawPlugin = require('../../lib/Plugin/RawPlugin');

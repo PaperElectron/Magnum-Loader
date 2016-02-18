@@ -28,8 +28,12 @@ var SharedEvents = new Events();
  * @returns {MagnumLoader}
  */
 module.exports = function(pkgJson, frameworkOpts){
-
+  var PluginInjector = new Injector();
+  var FrameworkInjector = new Injector();
+  
   var FrameworkOptions = OptionParser(frameworkOpts, Errors);
+  FrameworkInjector.service('Options', FrameworkOptions);
+  console.log(FrameworkInjector.get('Options'));
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
     Output: Output,
@@ -37,9 +41,9 @@ module.exports = function(pkgJson, frameworkOpts){
     SystemLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, FrameworkOptions.verbose, 'magenta'),
     FrameworkLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, true, 'magenta')
   };
-  Injector.service('Errors', Errors);
-  Injector.service('Logger', Loggers.Logger);
-  Injector.service('Env', process.env)
+  PluginInjector.service('Errors', Errors);
+  PluginInjector.service('Logger', Loggers.Logger);
+  PluginInjector.service('Env', process.env);
 
   var pkgDependencies = _.keys(pkgJson.dependencies)
   if(!pkgDependencies){
@@ -48,7 +52,7 @@ module.exports = function(pkgJson, frameworkOpts){
 
   var Shared = {
     SharedEvents: SharedEvents,
-    Injector: Injector,
+    Injector: PluginInjector,
     Loggers: Loggers,
     Output: Loggers.Output,
     FrameworkErrors: Errors,
