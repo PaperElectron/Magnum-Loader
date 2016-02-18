@@ -30,10 +30,9 @@ var SharedEvents = new Events();
 module.exports = function(pkgJson, frameworkOpts){
   var PluginInjector = new Injector();
   var FrameworkInjector = new Injector();
-  
+
   var FrameworkOptions = OptionParser(frameworkOpts, Errors);
   FrameworkInjector.service('Options', FrameworkOptions);
-  console.log(FrameworkInjector.get('Options'));
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
     Output: Output,
