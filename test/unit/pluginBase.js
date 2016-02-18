@@ -177,6 +177,28 @@ tap.test('Default and computed plugin configs return false if not present',funct
   t.equal(computedOpts, false, 'Computed options are false.');
 })
 
+tap.test('Plugin external configs are properly merged.',function(t) {
+  t.plan(7)
+  var plugin = PHelpers.completePlugin('test-9', {
+    untouched: 'ok',
+    name: 'test-9',
+    obj: {val: 100},
+    arr: [1,2,3,4,5]
+  });
+
+  var rawPlugin = new RawPlugin(plugin, instanceObjects.FrameworkOptions.layers);
+  var configPlugin = new PluginBase(rawPlugin, instanceObjects)
+  var defaultOpts = configPlugin.getDefaultConfig();
+  var computedOpts = configPlugin.getComputedConfig();
+  t.ok(defaultOpts, 'Default options are present.');
+  t.ok(computedOpts, 'Computed options are present.');
+  t.notOk(computedOpts['Test9'].notIncluded, 'Extraneous options in plugin configs are not included.');
+  t.equal(computedOpts['Test9'].untouched, 'ok', 'Untouched value is equal to default');
+  t.equal(computedOpts['Test9'].name, 'Set OK', 'External value is set correctly');
+  t.same(computedOpts['Test9'].obj, {val: 200, other: 100}, 'External object set correctly');
+  t.same(computedOpts['Test9'].arr, ['a','b'], 'External array set correctly');
+})
+
 
 function load(injector, loaded){return loaded(null, {ok: true})}
 function isDone(done) {
