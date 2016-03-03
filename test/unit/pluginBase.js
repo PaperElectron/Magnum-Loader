@@ -35,6 +35,7 @@ var instanceObjects = {
   Logger: console,
   Injector: injector,
   Output: {options: {verbose: true}},
+  FrameworkErrors: require(path.join(__dirname, '../../lib/Errors')),
   FrameworkOptions: {
     prefix: 'magnum',
     timeout: 2000,

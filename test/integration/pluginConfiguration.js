@@ -43,6 +43,7 @@ var loaderOptions = {
 
 var pkgJson = {
   "dependencies": {
+    "magnum-config-disabled": "0.0.0",
     "magnum-config-single": "0.0.0",
     "magnum-config-multiple": "0.0.0",
   }
@@ -52,7 +53,7 @@ mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
 });
-
+mockery.registerSubstitute('magnum-config-disabled', '../mocks/configurePlugins/magnum-config-disabled');
 mockery.registerSubstitute('magnum-config-single', '../mocks/configurePlugins/magnum-config-single');
 mockery.registerSubstitute('magnum-config-multiple', '../mocks/configurePlugins/magnum-config-multiple');
 
@@ -85,8 +86,9 @@ tap.test('Gets Computed plugin configuration', function(t) {
 
 tap.test('Loads Plugins with no errors', function(t){
   t.plan(1)
+  Loader.on('error', function(){})
   Loader.on('load', function(){
-    var errs = Loader.getPluginErrors()
+    var errs = Loader.getPluginErrors();
     t.equal(errs.length, 0, 'No Plugin errors')
   })
   Loader.load()
