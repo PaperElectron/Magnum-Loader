@@ -72,6 +72,10 @@ module.exports = function(pkgJson, frameworkOpts){
     process.exit()
   }
 
+  Shared.loadedModuleNames = _.chain(loadedPlugins).map(function(plugin) {
+    return plugin.moduleName
+  }).uniq().value()
+
   var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared);
 
   return MagnumLoader(iterator, Shared);

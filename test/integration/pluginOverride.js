@@ -29,7 +29,8 @@ var loaderOptions = {
 var pkgJson = {
   "dependencies": {
     "magnum-override-multiple": "0.0.0",
-    "magnum-override-multiple2": "0.0.0"
+    "magnum-override-multiple2": "0.0.0",
+    "magnum-override-multiple3": "0.0.0"
   }
 };
 
@@ -39,6 +40,7 @@ mockery.enable({
 });
 mockery.registerSubstitute('magnum-override-multiple', '../mocks/overridePlugins/n_modules/magnum-override-multiple');
 mockery.registerSubstitute('magnum-override-multiple2', '../mocks/overridePlugins/n_modules/magnum-override-multiple2');
+mockery.registerSubstitute('magnum-override-multiple3', '../mocks/overridePlugins/n_modules/magnum-override-multiple3');
 
 var LoadIndex = require('../../index');
 var Loader = LoadIndex(pkgJson, loaderOptions);
@@ -49,6 +51,8 @@ tap.test('Loads plugins', function(t) {
 })
 
 tap.test('Load event', function(t) {
+  Loader.on('error', function(err) {
+  })
   Loader.on('ready', function(){
     Loader.load()
 
@@ -76,4 +80,13 @@ tap.test('Overriding a multi plugin module child plugin', function(t){
 
   t.equal(override2.plugin, 'overridden', 'Works over multiple plugins');
   t.equal(untouched2.plugin, 'untouched', 'Multiple overridden plugins still run correct code.');
+});
+
+
+tap.test('Overriding multiple plugin from other multiple plugin', function(t){
+  t.plan(2);
+  var override = Loader.Injector.get('Override3Ok');
+  var untouched = Loader.Injector.get('Override3Stock');
+  t.equal(untouched.plugin, 'untouched', 'Untouched multiple plugin runs original code');
+  t.equal(override.plugin, 'overridden from multiple', 'Multiple plugin provides override hooks.')
 });
