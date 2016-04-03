@@ -24,7 +24,7 @@
     "chalk": "^1.1.1",
     "debug": "^2.2.0",
     "lodash": "^4.3.0",
-    "magnum-di": "^2.1.0",
+    "magnum-di": "^2.2.0",
     "parent-require": "^1.0.0",
     "should": "^8.0.2"
   },
