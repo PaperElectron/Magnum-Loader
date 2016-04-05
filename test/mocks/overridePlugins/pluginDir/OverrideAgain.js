@@ -11,6 +11,10 @@
  *
  * @module OverrideAgain
  */
+exports.metadata = {
+  name: 'Override2Ok',
+  type: 'override'
+}
 
 exports.override = {
   module: 'magnum-override-multiple2',

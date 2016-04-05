@@ -33,6 +33,10 @@ module.exports = [
     }
   },
   {
+    metadata: {
+      name: 'Override3Ok',
+      type: 'override'
+    },
     override: {
       module: 'magnum-override-multiple3',
       name: 'Override3Ok'
