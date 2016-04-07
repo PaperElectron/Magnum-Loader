@@ -14,9 +14,14 @@
 
 exports.metadata = {
   name: 'installFiles',
-  type: 'installer'
+  type: 'installer',
+  depends: ['magnum-test-a']
 }
 
 exports.installer = function(dirs, done){
-  done && done()
+  var install = [
+    {to: 'TestA', src: this.join(__dirname, '../mockInstallFiles/installDir'), dest: './test'},
+    {to: 'TestA', src: this.join(__dirname, '../mockInstallFiles/installFiles/justOne.js'), dest: './justOne.js'}
+  ]
+  done && done(null, install)
 }

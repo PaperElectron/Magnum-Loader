@@ -32,7 +32,7 @@ var pluginOptions = {
 var loaderOptions = {
   prefix: 'magnum',
   layers: ['core', 'data', 'dependency', 'platform'],
-  logger: console,
+  logger: mockConsole,
   parentDirectory: path.join(__dirname, '../mocks'),
   applicationDirectory: path.join(__dirname, '../mocks'),
   pluginDirectory: path.join(__dirname, '../', '/mocks/installerPlugins'),
@@ -83,6 +83,6 @@ tap.test('Load event', function(t) {
     }), 'Throws if load is called more than once.');
     t.end()
   })
-  
+  Loader.on('error', function(){})
 });
 
