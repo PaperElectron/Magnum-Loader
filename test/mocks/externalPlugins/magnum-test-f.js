@@ -29,6 +29,7 @@ exports.plugin = {
       resolve(done(null))
     })
   },
-  stop: function() {
+  stop: function(done) {
+    done(null)
   }
 };
