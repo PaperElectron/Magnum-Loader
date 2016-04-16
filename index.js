@@ -51,6 +51,7 @@ module.exports = function(pkgJson, frameworkOpts){
 
   var Shared = {
     SharedEvents: SharedEvents,
+    FrameworkInjector: FrameworkInjector,
     Injector: PluginInjector,
     Loggers: Loggers,
     Output: Loggers.Output,
