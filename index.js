@@ -32,7 +32,10 @@ module.exports = function(pkgJson, frameworkOpts){
   var FrameworkInjector = new Injector();
 
   var FrameworkOptions = OptionParser(frameworkOpts, Errors);
+
   FrameworkInjector.service('Options', FrameworkOptions);
+  FrameworkInjector.service('LoggerBuilder', AppendLogger);
+
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
     Output: Output,

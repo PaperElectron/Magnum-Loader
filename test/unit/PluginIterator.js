@@ -17,7 +17,7 @@ var injector = require('magnum-di')();
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
 var RawPlugin = require('../../lib/Plugin/RawPluginTypes/Dependency');
-var Plugin = require('../../lib/Plugin/PluginTypes/PluginDependency');
+// var Plugin = require('../../lib/Plugin/PluginTypes/PluginDependency');
 var path = require('path');
 
 var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
