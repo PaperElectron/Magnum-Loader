@@ -102,21 +102,21 @@ tap.test('Iterator start method', function(t) {
 
 });
 
-tap.test('Iterator stop method', function(t) {
-
-  iteratorInst.stop()
-    .then(function(result) {
-      t.ok(result.Core, 'Should have core object.');
-
-      result.Core.forEach(function(plugin){
-        console.log(plugin.stopped);
-        t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
-      })
-      t.end()
-      return null
-    })
-
-});
+// tap.test('Iterator stop method', function(t) {
+//
+//   iteratorInst.stop()
+//     .then(function(result) {
+//       t.ok(result.Core, 'Should have core object.');
+//
+//       result.Core.forEach(function(plugin){
+//         console.log(plugin);
+//         t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
+//       })
+//       t.end()
+//       return null
+//     })
+//
+// });
 
 tap.test('Iterator build plugin configs', function(t) {
   t.plan(2)
