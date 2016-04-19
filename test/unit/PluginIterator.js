@@ -13,11 +13,13 @@ mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
 });
-var injector = require('magnum-di')();
+var DI = require('magnum-di')
+var injector = DI();
+var FrameworkInjector = DI()
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
 var RawPlugin = require('../../lib/Plugin/RawPluginTypes/Dependency');
-// var Plugin = require('../../lib/Plugin/PluginTypes/PluginDependency');
+var Plugin = require('../../lib/Plugin/Plugin');
 var path = require('path');
 
 var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
@@ -31,6 +33,7 @@ var instanceObjects = {
   },
   FrameworkErrors: require('../../lib/Errors'),
   Injector: injector,
+  FrameworkInjector: FrameworkInjector,
   FrameworkOptions: {
     prefix: 'magnum',
     timeout: 2000,
@@ -39,10 +42,15 @@ var instanceObjects = {
   }
 };
 
+FrameworkInjector.service('LoggerBuilder', function(){
+  return mockConsole()
+})
+
 var Shared = {
   ParentDirectory: instanceObjects.ParentDirectory,
   Logger: instanceObjects.Loggers.Logger,
   Injector: instanceObjects.Injector,
+  FrameworkInjector: instanceObjects.FrameworkInjector,
   Output: instanceObjects.Loggers.Output,
   FrameworkErrors: instanceObjects.FrameworkErrors,
   FrameworkOptions: instanceObjects.FrameworkOptions
@@ -101,6 +109,7 @@ tap.test('Iterator stop method', function(t) {
       t.ok(result.Core, 'Should have core object.');
 
       result.Core.forEach(function(plugin){
+        console.log(plugin.stopped);
         t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
       })
       t.end()
