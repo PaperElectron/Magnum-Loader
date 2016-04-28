@@ -11,8 +11,7 @@ var tap = require('tap');
 var mockery = require('mockery');
 var path = require('path');
 var util = require('util');
-var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPlugin'));
-
+var RawPlugin = require(path.join(__dirname, '../../', 'lib/Plugin/RawPluginTypes/Dependency'));
 mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false

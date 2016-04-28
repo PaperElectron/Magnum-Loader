@@ -30,7 +30,7 @@ exports.plugin = {
   start: function(done) {
     done(null)
   },
-  stop: function() {
-
+  stop: function(done) {
+    done(null)
   }
 };

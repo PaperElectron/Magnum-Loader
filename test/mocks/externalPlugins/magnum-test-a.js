@@ -24,6 +24,7 @@ exports.metadata = {
 
 exports.plugin = {
   load: function(inject, loaded) {
+    // throw new Error("ExternalPlugins/test-a")
     setTimeout(function() {
       loaded(null, function(){
         return {name: 'test-a', random: Math.random()}
@@ -36,6 +37,7 @@ exports.plugin = {
       resolve(done(null))
     })
   },
-  stop: function() {
+  stop: function(done) {
+    done()
   }
 };

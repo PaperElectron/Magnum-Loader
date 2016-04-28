@@ -13,6 +13,7 @@ var MagnumLoader = require('./lib/MagnumLoader');
 var OptionParser = require('./lib/FrameworkOptions');
 var Errors = require('./lib/Errors');
 var AppendLogger = require('./lib/LoggerBuilder');
+var NameGenerator = require('./lib/Validators/NameGenerator');
 var _ = require('lodash');
 var Events = require('events').EventEmitter;
 var SharedEvents = new Events();
@@ -32,7 +33,11 @@ module.exports = function(pkgJson, frameworkOpts){
   var FrameworkInjector = new Injector();
 
   var FrameworkOptions = OptionParser(frameworkOpts, Errors);
+
   FrameworkInjector.service('Options', FrameworkOptions);
+  FrameworkInjector.service('LoggerBuilder', AppendLogger);
+  FrameworkInjector.service('NameGenerator', NameGenerator);
+
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
     Output: Output,
@@ -51,6 +56,7 @@ module.exports = function(pkgJson, frameworkOpts){
 
   var Shared = {
     SharedEvents: SharedEvents,
+    FrameworkInjector: FrameworkInjector,
     Injector: PluginInjector,
     Loggers: Loggers,
     Output: Loggers.Output,
@@ -67,8 +73,7 @@ module.exports = function(pkgJson, frameworkOpts){
     var loadedPlugins = PluginFactory(pkgDependencies, Shared);
   }
   catch(err){
-    Shared.Loggers.FrameworkLogger.error(err.message)
-    Shared.Loggers.FrameworkLogger.error(Output.failedToLoadPlugin)
+    Shared.Loggers.FrameworkLogger.error(Output.failedToLoad( err.failedRequire ) )
     process.exit()
   }
 
