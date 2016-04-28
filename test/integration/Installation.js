@@ -10,12 +10,17 @@ var tap = require('tap');
 var mockery = require('mockery');
 var _ = require('lodash');
 var path = require('path');
+var Promise = require('bluebird');
+var fs = Promise.promisifyAll(require('fs-extra'));
 var mockConsole = {
   log: _.noop,
   warn: _.noop,
   error: _.noop,
   info: _.noop
 };
+
+var targetWorkDir = path.join(__dirname, '../mocks/mockWorkDir');
+var gitkeepPath = path.join(targetWorkDir, '.gitkeep');
 
 var pluginOptions = {
   test_g: {
@@ -64,25 +69,45 @@ mockery.registerSubstitute('magnum-test-f', '../mocks/externalPlugins/magnum-tes
 mockery.registerSubstitute('magnum-test-g', '../mocks/externalPlugins/magnum-test-g');
 
 var LoadIndex = require('../../index');
-var Loader = LoadIndex(pkgJson, loaderOptions);
 
-tap.test('Instantiation', function(t){
-  t.plan(1);
-  t.ok(Loader, 'It is created')
 
-});
+tap.test('Empty workDir', function(t){
+  return fs.emptyDirAsync(path.join(__dirname, '../mocks/mockWorkDir'))
+    .then(function(result) {
+      t.end()
+    })
+})
+  .then('Replace gitkeep', function(t){
 
-tap.test('Load event', function(t) {
-  Loader.on('ready', function(){
-    Loader.load()
+    return fs.outputFileAsync(gitkeepPath)
+      .then(function(result) {
+        console.log('sdsadadasd4hv');
+        t.end()
+      })
+})
+  .then(function() {
+  var Loader = LoadIndex(pkgJson, loaderOptions);
+  tap.test('Instantiation', function(t){
+    t.plan(1);
+    t.ok(Loader, 'It is created')
 
   });
-  Loader.on('load', function(){
-    t.throws((function() {
+
+  tap.test('Load event', function(t) {
+    Loader.on('ready', function(){
       Loader.load()
-    }), 'Throws if load is called more than once.');
-    t.end()
+
+    });
+    Loader.on('load', function(){
+      t.throws((function() {
+        Loader.load()
+      }), 'Throws if load is called more than once.');
+      t.end()
+    })
+    Loader.on('error', function(err){
+      console.log(err);
+    })
   })
-  Loader.on('error', function(){})
 });
+
 

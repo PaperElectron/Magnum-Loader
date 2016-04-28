@@ -9,21 +9,23 @@
 
 var tap = require('tap');
 var mockery = require('mockery');
+var path = require('path');
 mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
 });
-var DI = require('magnum-di')
+var DI = require('magnum-di');
 var injector = DI();
-var FrameworkInjector = DI()
+var FrameworkInjector = DI();
+var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validators/NameGenerator'))
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
 var RawPlugin = require('../../lib/Plugin/RawPluginTypes/Dependency');
 var Plugin = require('../../lib/Plugin/Plugin');
-var path = require('path');
+
 
 var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
-var mockSettingsPath = path.join(__dirname, '../mocks/mockPluginSettings')
+var mockSettingsPath = path.join(__dirname, '../mocks/mockPluginSettings');
 var instanceObjects = {
   ParentDirectory: path.join(__dirname, '../'),
   Loggers: {
@@ -45,6 +47,8 @@ var instanceObjects = {
 FrameworkInjector.service('LoggerBuilder', function(){
   return mockConsole()
 })
+
+FrameworkInjector.service('NameGenerator', NameGenerator)
 
 var Shared = {
   ParentDirectory: instanceObjects.ParentDirectory,

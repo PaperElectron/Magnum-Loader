@@ -77,6 +77,10 @@ tap.test('Load event', function(t) {
 
   });
   
+  Loader.on('error', function(err){
+    console.log(err);
+  })
+  
   Loader.on('load', function(){
     t.throws((function() {
       Loader.load()
