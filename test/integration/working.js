@@ -76,11 +76,11 @@ tap.test('Load event', function(t) {
     Loader.load()
 
   });
-  
+
   Loader.on('error', function(err){
     console.log(err);
   })
-  
+
   Loader.on('load', function(){
     t.throws((function() {
       Loader.load()
@@ -93,7 +93,7 @@ tap.test('Loading plugins', function(t){
   t.plan(6);
   var core = Loader.getLoaded('core');
   t.type(core, Array, 'Core returned Array');
-  t.equal(core.length, 8, 'Has 8 loaded core plugins.');
+  t.equal(core.length, 10, 'Has 10 loaded core plugins.');
 
   var dependency = Loader.getLoaded('dependency');
   t.type(dependency, Array, 'Dependency returned Array');
