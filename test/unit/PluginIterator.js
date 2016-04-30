@@ -44,6 +44,8 @@ var instanceObjects = {
   }
 };
 
+FrameworkInjector.service('Options', instanceObjects.FrameworkOptions)
+
 FrameworkInjector.service('LoggerBuilder', function(){
   return mockConsole()
 })
