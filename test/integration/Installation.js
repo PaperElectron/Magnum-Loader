@@ -20,6 +20,11 @@ var mockConsole = {
 };
 
 var targetWorkDir = path.join(__dirname, '../mocks/mockWorkDir');
+var TestFile = path.join(targetWorkDir, 'justOne.js')
+var CreatedTestDir = path.join(targetWorkDir, 'test')
+var NestedTestFile = path.join(CreatedTestDir, 'test.js')
+var NestedTestFile2 = path.join(CreatedTestDir, 'test2.js')
+
 var gitkeepPath = path.join(targetWorkDir, '.gitkeep');
 
 var pluginOptions = {
@@ -72,7 +77,7 @@ var LoadIndex = require('../../index');
 
 
 tap.test('Empty workDir', function(t){
-  return fs.emptyDirAsync(path.join(__dirname, '../mocks/mockWorkDir'))
+  return fs.emptyDirAsync(targetWorkDir)
     .then(function(result) {
       t.end()
     })
@@ -102,6 +107,8 @@ tap.test('Empty workDir', function(t){
       t.throws((function() {
         Loader.load()
       }), 'Throws if load is called more than once.');
+
+      testFileCreation()
       t.end()
     })
     Loader.on('error', function(err){
@@ -110,4 +117,25 @@ tap.test('Empty workDir', function(t){
   })
 });
 
+function testFileCreation(done) {
+  tap.test('Files Should be created', function(t) {
+    t.plan(4)
+    return fs.statAsync(TestFile)
+      .then(function(file) {
+        t.ok(file.isFile(), 'workdir/justOne.js created')
 
+        return fs.statAsync(CreatedTestDir)
+      })
+      .then(function(dir) {
+        t.ok(dir.isDirectory(), 'workdir/test directory created')
+        return fs.statAsync(NestedTestFile)
+      })
+      .then(function(file) {
+        t.ok(file.isFile(), 'workdir/test/test.js created')
+        return fs.statAsync(NestedTestFile)
+      })
+      .then(function(file) {
+        t.ok(file.isFile(), 'workdir/test/test2.js created')
+      })
+  })
+}
