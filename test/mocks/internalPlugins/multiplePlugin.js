@@ -58,7 +58,7 @@ module.exports = [
     metadata: {
       name: 'MultiplePlugin3',
       param: 'Multiple3',
-      type: 'none',
+      type: 'action',
       layer: 'core'
     },
 

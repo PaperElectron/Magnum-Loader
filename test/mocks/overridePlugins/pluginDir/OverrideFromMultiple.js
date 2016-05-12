@@ -17,7 +17,7 @@ module.exports = [
     metadata: {
       name: 'Fake',
       layer: 'core',
-      type: 'none'
+      type: 'action'
     },
 
     plugin: {

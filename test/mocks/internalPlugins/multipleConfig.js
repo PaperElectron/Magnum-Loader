@@ -40,7 +40,7 @@ module.exports = [
     metadata: {
       name: 'MultipleConfig2',
       param: 'MultipleConfig2',
-      type: 'none',
+      type: 'action',
       layer: 'core'
     },
 
