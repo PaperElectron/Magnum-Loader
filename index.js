@@ -6,6 +6,7 @@
  */
 
 'use strict';
+var version = require('./package.json').version
 var Injector = require('magnum-di');
 var PluginFactory = require('./lib/PluginFactory');
 var PluginIterator = require('./lib/PluginIterator');
@@ -49,9 +50,11 @@ module.exports = function(pkgJson, frameworkOpts){
   PluginInjector.service('Logger', Loggers.Logger);
   PluginInjector.service('Env', process.env);
 
+  Loggers.FrameworkLogger.log('Loader version '+ version + ' setup complete')
+
   var pkgDependencies = _.keys(pkgJson.dependencies)
   if(!pkgDependencies){
-    Loggers.FrameworkLogger('No Dependencies found in package.json.')
+    Loggers.FrameworkLogger.log('No Dependencies found in package.json.')
   }
 
   var Shared = {
@@ -73,6 +76,7 @@ module.exports = function(pkgJson, frameworkOpts){
     var loadedPlugins = PluginFactory(pkgDependencies, Shared);
   }
   catch(err){
+    console.log(err.stack);
     Shared.Loggers.FrameworkLogger.error(Output.failedToLoad( err.failedRequire ) )
     process.exit()
   }
