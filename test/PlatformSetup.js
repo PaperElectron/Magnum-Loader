@@ -20,19 +20,20 @@ var LoadIndex = require('../index');
 
 
 module.exports = function(mockPath, verbose){
-  process.chdir(path.join(__dirname, './mocks', '/_integration', mockPath))
-  var cwd = process.cwd()
+  // process.chdir(path.join(__dirname, './mocks', '/_integration', mockPath))
+  var parentDir = path.join(__dirname, './mocks', '/_integration', mockPath)
+  // var cwd = process.cwd()
   var loaderOptions = {
     prefix: 'magnum',
     layers: ['core', 'data', 'dependency', 'platform'],
     logger: mockConsole(verbose),
-    parentDirectory: cwd,
-    applicationDirectory: path.join(cwd,'./application'),
-    pluginDirectory: path.join(cwd,'./plugins'),
-    pluginSettingsDirectory: path.join(cwd, './pluginSettings')
+    parentDirectory: parentDir,
+    applicationDirectory: path.join(parentDir,'./application'),
+    pluginDirectory: path.join(parentDir,'./plugins'),
+    pluginSettingsDirectory: path.join(parentDir, './pluginSettings')
   };
 
-  var pkgJson = require(path.join(process.cwd(), './package.json'))
+  var pkgJson = require(path.join(parentDir, './package.json'))
 
   mockery.enable({
     useCleanCache: true,
@@ -40,7 +41,7 @@ module.exports = function(mockPath, verbose){
   });
 
   _.mapValues(pkgJson.dependencies, function(version, prop){
-    mockery.registerSubstitute(prop, path.join(process.cwd(),'./n_modules/', prop));
+    mockery.registerSubstitute(prop, path.join(parentDir,'./n_modules/', prop));
   })
 
   var Loader = LoadIndex(pkgJson, loaderOptions);

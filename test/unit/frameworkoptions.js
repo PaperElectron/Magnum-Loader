@@ -10,6 +10,7 @@ var path = require('path');
 var Errors = require('../../lib/Errors');
 var OptsParser = require('../../lib/FrameworkOptions');
 
+
 tap.test('Throws correct errors on missing or bad required params.', function(t) {
   t.plan(7)
 
