@@ -8,7 +8,7 @@
 var tap = require('tap');
 var _ = require('lodash');
 
-var Loader = require('../PlatformSetup')('working', false)
+var Loader = require('../PlatformSetup')('working', true)
 
 tap.test('Instantiation', function(t){
   t.plan(1);

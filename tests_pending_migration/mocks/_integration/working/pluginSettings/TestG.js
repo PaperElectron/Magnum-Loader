@@ -1,5 +1,5 @@
 /**
- * @file test2
+ * @file test_g
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -9,7 +9,9 @@
 
 /**
  *
- * @module test2
+ * @module test_g
  */
 
-module.exports = {also: 'Awesome'};
+module.exports.TestG = {
+  disabled: true
+}

@@ -20,7 +20,7 @@ var FrameworkInjector = DI();
 var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validators/NameGenerator'))
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
-var RawPlugin = require('../../lib/Plugin/RawPluginTypes/Dependency');
+var RawPlugin = require('../../lib/RawPlugin/Types/Dependency');
 var Plugin = require('../../lib/Plugin/Plugin');
 
 
@@ -63,11 +63,11 @@ var Shared = {
 };
 
 var plugins = [
-    makePlugin('test-a'),
+    makePlugin('test-a', ['TestC']),
     makePlugin('test-b'),
     makePlugin('test-c')
   ]
-
+instanceObjects.loadedModuleNames = ['TestA','TestB','TestC']
 var iteratorInst;
 
 tap.test('Iterator instantiation', function(t) {
@@ -140,12 +140,18 @@ tap.test('Find conflicts', function(t){
 
 
 
-function makePlugin(moduleName) {
+function makePlugin(moduleName, depends, provides) {
   var pArgs =
       {
         loaded: {
           options: {name: moduleName},
-          metadata: {name: moduleName, layer: 'core', type: 'service', param: moduleName.replace('-', '_')},
+          metadata: {
+            name: moduleName,
+            layer: 'core',
+            type: 'service',
+            depends: depends || [],
+            provides: provides || [],
+            param: moduleName.replace('-', '_')},
           plugin: {
             load: function(inject, loaded) {
               loaded(null, {name: moduleName})

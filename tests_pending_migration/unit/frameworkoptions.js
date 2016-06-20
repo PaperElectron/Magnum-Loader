@@ -88,13 +88,11 @@ tap.test('Parses Raw framework options correctly and sets defaults', function(t)
 });
 
 tap.test('Parses Raw framework options correctly explicit plugin dir', function(t) {
-  var parentDir = path.join(__dirname,'../','mocks/_unit/frameworkoptions')
-  var pluginDir = path.join(parentDir, 'plugins')
   var setPluginDir = OptsParser({
     prefix: 'magnum',
     layers: ['core'],
-    parentDirectory: parentDir,
-    pluginDirectory: pluginDir,
+    parentDirectory: __dirname,
+    pluginDirectory: path.join(__dirname,'../','mocks/internalPlugins'),
     verbose: false,
     colors: false,
     logger: console
@@ -103,7 +101,7 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
   var falseColorVerbose = OptsParser({
     prefix: 'magnum',
     layers: ['core'],
-    parentDirectory: parentDir,
+    parentDirectory: __dirname,
     verbose: false,
     colors: false,
     logger: console
@@ -112,13 +110,13 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
   var trueColorVerbose = OptsParser({
     prefix: 'magnum',
     layers: ['core'],
-    parentDirectory: parentDir,
+    parentDirectory: __dirname,
     verbose: true,
     colors: true,
     logger: console
   }, Errors)
   t.plan(5)
-  t.equal(setPluginDir.pluginDirectory, pluginDir, 'Sets pluginDirectory correctly')
+  t.equal(setPluginDir.pluginDirectory, path.join(__dirname,'../','mocks/internalPlugins'), 'Sets pluginDirectory correctly')
   t.equal(falseColorVerbose.verbose, false, 'options.verbose: false');
   t.equal(falseColorVerbose.colors, false, 'options.colors: false');
   t.equal(trueColorVerbose.verbose, true, 'options.verbose: true');

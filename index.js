@@ -37,7 +37,7 @@ module.exports = function(pkgJson, frameworkOpts){
 
   FrameworkInjector.service('Options', FrameworkOptions);
   FrameworkInjector.service('LoggerBuilder', AppendLogger);
-  FrameworkInjector.service('NameGenerator', NameGenerator);
+  FrameworkInjector.service('NameGenerator', NameGenerator(FrameworkOptions.prefix));
 
   var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
   var Loggers = {
@@ -82,8 +82,9 @@ module.exports = function(pkgJson, frameworkOpts){
   }
 
   Shared.loadedModuleNames = _.chain(loadedPlugins).map(function(plugin) {
-    return plugin.moduleName
+    return plugin.configName
   }).uniq().value()
+  FrameworkInjector.service('LoadedModuleNames', Shared.loadedModuleNames)
 
   var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared);
 
