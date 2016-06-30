@@ -84,10 +84,10 @@ module.exports = function(pkgJson, frameworkOpts){
   Shared.loadedModuleNames = _.chain(loadedPlugins).map(function(plugin) {
     return plugin.configName
   }).uniq().value()
-  
+
   FrameworkInjector.service('LoadedModuleNames', Shared.loadedModuleNames)
 
-  var iterator = new PluginIterator(loadedPlugins, FrameworkOptions.layers, Shared);
+  var iterator = new PluginIterator(loadedPlugins, Shared);
 
   return MagnumLoader(iterator, Shared);
 };

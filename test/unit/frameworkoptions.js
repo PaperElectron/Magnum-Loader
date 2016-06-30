@@ -12,7 +12,7 @@ var OptsParser = require('../../lib/FrameworkOptions');
 
 
 tap.test('Throws correct errors on missing or bad required params.', function(t) {
-  t.plan(7)
+  t.plan(6)
 
   /*
    * Check Order
@@ -30,10 +30,6 @@ tap.test('Throws correct errors on missing or bad required params.', function(t)
   t.throws(function() {
     OptsParser({}, Errors)
   }, /options.prefix not set./, 'Options.prefix not provided.')
-
-  t.throws(function() {
-    OptsParser({prefix: 'magnum'}, Errors)
-  }, /options.layers not set./, 'Options.layers not provided.')
 
   t.throws(function() {
     OptsParser({prefix: 'magnum', layers: ['core'], parentDirectory: __dirname}, Errors)
@@ -61,7 +57,6 @@ tap.test('Options.pluginDirectory not a directory', function(t) {
   t.throws(function(){
     var BadOpts = OptsParser({
       prefix: 'magnum',
-      layers: ['core'],
       parentDirectory: __dirname,
       pluginDirectory: __dirname + '/plugin.js',
       logger: console
@@ -73,14 +68,11 @@ tap.test('Options.pluginDirectory not a directory', function(t) {
 tap.test('Parses Raw framework options correctly and sets defaults', function(t) {
   var GoodOpts = OptsParser({
     prefix: 'magnum',
-    layers: ['core'],
     parentDirectory: __dirname,
     logger: console
   }, Errors)
-  t.plan(8)
+  t.plan(6)
   t.equal(GoodOpts.prefix, 'magnum');
-  t.equal(GoodOpts.layers[0], 'system');
-  t.equal(GoodOpts.layers[1], 'core');
   t.equal(GoodOpts.parentDirectory, __dirname);
   t.equal(GoodOpts.applicationDirectory, __dirname);
   t.equal(GoodOpts.pluginDirectory, false);
@@ -93,7 +85,6 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
   var pluginDir = path.join(parentDir, 'plugins')
   var setPluginDir = OptsParser({
     prefix: 'magnum',
-    layers: ['core'],
     parentDirectory: parentDir,
     pluginDirectory: pluginDir,
     verbose: false,
@@ -103,7 +94,6 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
 
   var falseColorVerbose = OptsParser({
     prefix: 'magnum',
-    layers: ['core'],
     parentDirectory: parentDir,
     verbose: false,
     colors: false,
@@ -112,7 +102,6 @@ tap.test('Parses Raw framework options correctly explicit plugin dir', function(
 
   var trueColorVerbose = OptsParser({
     prefix: 'magnum',
-    layers: ['core'],
     parentDirectory: parentDir,
     verbose: true,
     colors: true,

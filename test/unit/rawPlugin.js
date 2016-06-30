@@ -32,13 +32,13 @@ tap.test('Loading raw plugins', function(t){
     new RawPlugin()
   }, 'Throws with no args')
 
-  var rp = RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp = RawPlugin(incompletePlugin);
   t.ok(rp instanceof RawPlugin, 'Constructs with proper context without new')
 })
 
 tap.test('Returns with errors with modulename.', function(t) {
   t.plan(5)
-  var rp = new RawPlugin({}, ['core', 'data','server']);
+  var rp = new RawPlugin({});
   t.ok(rp, 'Returns "something"');
   t.ok(rp.hasErrors(), 'Has some errors to report.');
   var errors = rp.getErrors()
@@ -49,7 +49,7 @@ tap.test('Returns with errors with modulename.', function(t) {
 
 tap.test('Returns with errors with no data.', function(t) {
   t.plan(5)
-  var rp = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp = new RawPlugin(incompletePlugin);
   t.ok(rp, 'Returns "something"');
   t.ok(rp.hasErrors(), 'Has some errors to report.');
   var errors = rp.getErrors()
@@ -61,23 +61,15 @@ tap.test('Returns with errors with no data.', function(t) {
 tap.test('Returns with errors on partial data', function(t) {
   t.plan(1)
   incompletePlugin.loaded.metadata = {blah: 10}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1 = new RawPlugin(incompletePlugin);
   var rp1errs = rp1.getErrors()
-  t.equal(rp1errs.Errors.length, 4);
-})
-
-tap.test('Returns with errors from bad layer', function(t) {
-  t.plan(1)
-  incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'nope'}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
-  var rp1errs = rp1.getErrors()
-  t.equal(rp1errs.Errors.length, 3, 'Correct number of errors');
+  t.equal(rp1errs.Errors.length, 3);
 })
 
 tap.test('Returns with errors from missing or invalid hook functions', function(t) {
   t.plan(1)
   incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core'}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1 = new RawPlugin(incompletePlugin);
   var rp1errs = rp1.getErrors()
   t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
 })
@@ -86,7 +78,7 @@ tap.test('Returns with errors from invalid hook functions', function(t) {
   t.plan(1)
   incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core'}
   incompletePlugin.loaded.plugin = {load: load, start: 1, stop: 1}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1 = new RawPlugin(incompletePlugin);
   var rp1errs = rp1.getErrors()
   t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
 })
@@ -95,7 +87,7 @@ tap.test('Returns with errors from wrong injection type', function(t) {
   t.plan(1)
   incompletePlugin.loaded.metadata = {name: 'Raw_Plugin', layer: 'core', type: 'blah'}
   incompletePlugin.loaded.plugin = {load: load, start: 1, stop: 1}
-  var rp1 = new RawPlugin(incompletePlugin, ['core', 'data','server']);
+  var rp1 = new RawPlugin(incompletePlugin);
   var rp1errs = rp1.getErrors()
   t.equal(rp1errs.Errors.length, 2, 'Correct number of errors');
 })

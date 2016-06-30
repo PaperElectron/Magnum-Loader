@@ -1,5 +1,5 @@
 /**
- * @file topoSorted
+ * @file iterator
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -17,7 +17,7 @@ mockery.enable({
 var DI = require('magnum-di');
 var injector = DI();
 var FrameworkInjector = DI();
-var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validators/NameGenerator'))
+var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validators/NameGenerator'))()
 var Iterator = require('../../lib/PluginIterator');
 var Output = require('../../lib/Outputs');
 var RawPlugin = require('../../lib/RawPlugin/Types/Dependency');
@@ -45,12 +45,12 @@ var instanceObjects = {
 };
 
 FrameworkInjector.service('Options', instanceObjects.FrameworkOptions)
-FrameworkInjector.service('LoadedModuleNames', ['TestC','TestD','TestE','TestF','TestG','TestA','TestB'])
+
 FrameworkInjector.service('LoggerBuilder', function(){
   return mockConsole()
 })
 
-FrameworkInjector.service('NameGenerator', NameGenerator('magnum'))
+FrameworkInjector.service('NameGenerator', NameGenerator)
 
 var Shared = {
   ParentDirectory: instanceObjects.ParentDirectory,
@@ -63,17 +63,12 @@ var Shared = {
 };
 
 var plugins = [
-  makePlugin('test-a', ['TestC', 'TestG']),
-  makePlugin('test-b', ['TestF']),
-  makePlugin('test-c'),
-  makePlugin('test-d'),
-  makePlugin('test-e'),
-  makePlugin('test-f'),
-  makePlugin('test-g')
-]
-var expectedOrder = FrameworkInjector.get('LoadedModuleNames')
-instanceObjects.loadedModuleNames = expectedOrder
-
+    makePlugin('test-a', ['TestC']),
+    makePlugin('test-b'),
+    makePlugin('test-c')
+  ]
+instanceObjects.loadedModuleNames = ['TestA','TestB','TestC']
+FrameworkInjector.service('LoadedModuleNames', instanceObjects.loadedModuleNames)
 var iteratorInst;
 
 tap.test('Iterator instantiation', function(t) {
@@ -89,52 +84,46 @@ tap.test('Iterator instantiation', function(t) {
 
 
 
-tap.test('Iterator load method, correct order', function(t) {
-
+tap.test('Iterator load method', function(t) {
+  t.plan(1)
   iteratorInst.load()
-    .then(function(result) {
-      result.forEach(function(plugin, k){
-        t.same(plugin.configName, expectedOrder[k], plugin.configName + ' - Should match expected order ' + expectedOrder[k])
-        t.ok(plugin.loaded, plugin.declaredName + ' loaded.');
+      .then(function(result) {
+        return t.equal(result.length, 3,  'Loads the correct # of plugins')
       })
-      t.end()
-      return null
-    })
-    // .catch(function(err) {
-    //   console.log(iteratorInst);
-    // })
 
 });
 
-tap.test('Iterator start method, correct order', function(t) {
-
+tap.test('Iterator start method', function(t) {
+  t.plan(1)
   iteratorInst.start()
     .then(function(result) {
-      result.forEach(function(plugin, k){
-        t.same(plugin.configName, expectedOrder[k], plugin.configName + ' - Should match expected order ' + expectedOrder[k])
-        t.ok(plugin.started, plugin.declaredName + ' started.');
-      })
-      t.end()
-      return null
+      return t.equal(result.length, 3,  'Starts the correct # of plugins')
     })
 
 });
 
-tap.test('Iterator stop method, correct order', function(t) {
-
+tap.test('Iterator stop method', function(t) {
+  t.plan(1)
   iteratorInst.stop()
     .then(function(result) {
-      var reverseExpected = expectedOrder.reverse()
-      result.forEach(function(plugin, k){
-        t.same(plugin.configName, reverseExpected[k], plugin.configName + ' - Should match expected order ' + reverseExpected[k])
-        // t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
-      })
-      t.end()
-      return null
+      return t.equal(result.length, 3,  'Stops the correct # of plugins')
     })
 
 });
 
+tap.test('Iterator build plugin configs', function(t) {
+  t.plan(2)
+  var defaults = iteratorInst.getPluginConfigs({stringify: false, defaults: true});
+  var computed = iteratorInst.getPluginConfigs({stringify: false, defaults: false});
+  t.ok(defaults)
+  t.ok(computed)
+});
+
+tap.test('Find conflicts', function(t){
+  t.plan(1)
+  var conflicts = iteratorInst.findNameConflict('none')
+  t.equal(conflicts.conflicts.length, 0, 'No conflicts')
+})
 
 
 
@@ -164,12 +153,11 @@ function makePlugin(moduleName, depends, provides) {
         },
         moduleName: moduleName
       };
-  var plugin = new RawPlugin(pArgs, instanceObjects.FrameworkOptions.layers)
+  var plugin = new RawPlugin(pArgs)
   return new Plugin(plugin, Shared)
 }
 
 function mockConsole(){
-  // return console
   return {
     log: function(){},
     error: function(){},

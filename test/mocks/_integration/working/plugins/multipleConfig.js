@@ -17,7 +17,6 @@ module.exports = [
     options: {defaultName: 'MultipleConfig1', setName: 'OtherValue'},
     metadata: {
       name: 'MultipleConfig1',
-      layer: 'core',
       type: 'service',
       param: 'MultipleConfig1'
     },
@@ -40,8 +39,7 @@ module.exports = [
     metadata: {
       name: 'MultipleConfig2',
       param: 'MultipleConfig2',
-      type: 'action',
-      layer: 'core'
+      type: 'action'
     },
 
     plugin: {
