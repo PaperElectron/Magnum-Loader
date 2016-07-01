@@ -19,14 +19,14 @@ var LoadIndex = require('../index');
 
 
 
-module.exports = function(mockPath, verbose){
+module.exports = function(mockPath, verbose, overrideConsole){
   // process.chdir(path.join(__dirname, './mocks', '/_integration', mockPath))
   var parentDir = path.join(__dirname, './mocks', '/_integration', mockPath)
   // var cwd = process.cwd()
   var loaderOptions = {
     prefix: 'magnum',
     layers: ['core', 'data', 'dependency', 'platform'],
-    logger: mockConsole(verbose),
+    logger: overrideConsole || mockConsole(verbose),
     parentDirectory: parentDir,
     applicationDirectory: path.join(parentDir,'./application'),
     pluginDirectory: path.join(parentDir,'./plugins'),

@@ -1,0 +1,8 @@
+{
+  "name": "test-working",
+  "dependencies": {
+    "magnum-override-multiple": "0.0.0",
+    "magnum-override-multiple2": "0.0.0",
+    "magnum-override-multiple3": "0.0.0"
+  }
+}

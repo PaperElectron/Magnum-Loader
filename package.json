@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test tap -R spec --cov test/unit/*.js test/integration/**/*.js",
-    "test-unit": "NODE_ENV=test tap -R spec --cov test/unit/*.js",
-    "test-integration": "NODE_ENV=test tap -R spec --cov test/integration/**/*.js",
-    "test-report": "NODE_ENV=test tap -R spec --cov --coverage-report=lcov test/unit/*.js test/integration/**/*.js",
-    "test-file": "NODE_ENV=test tap -R spec --cov"
+    "test:unit": "NODE_ENV=test tap -R spec --cov test/unit/*.js",
+    "test:integration": "NODE_ENV=test tap -R spec --cov test/integration/**/*.js",
+    "test:report": "NODE_ENV=test tap -R spec --cov --coverage-report=lcov test/unit/*.js test/integration/**/*.js",
+    "test:file": "NODE_ENV=test tap -R spec --cov"
   },
   "keywords": [
     "Dependency Injection",
@@ -35,7 +35,8 @@
   },
   "devDependencies": {
     "mockery": "^1.4.0",
-    "tap": "^5.4.3"
+    "strip-ansi": "^3.0.1",
+    "tap": "^6.0.0"
   },
   "directories": {
     "test": "test"

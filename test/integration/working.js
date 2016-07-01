@@ -27,10 +27,12 @@ tap.test('Load event', function(t) {
   })
 
   Loader.on('load', function(){
+    t.plan(2)
     t.throws((function() {
       Loader.load()
     }), 'Throws if load is called more than once.');
-    t.end()
+    var errs = Loader.getPluginErrors();
+    t.equal(errs.length, 0, 'No Plugin errors')
   })
 });
 
