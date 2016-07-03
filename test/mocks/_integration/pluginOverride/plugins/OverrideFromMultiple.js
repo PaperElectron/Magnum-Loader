@@ -16,7 +16,6 @@ module.exports = [
   {
     metadata: {
       name: 'Fake',
-      layer: 'core',
       type: 'action'
     },
 

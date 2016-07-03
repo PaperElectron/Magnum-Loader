@@ -72,7 +72,9 @@ var plugins = [
   makePlugin('test-g')
 ]
 var expectedOrder = FrameworkInjector.get('LoadedModuleNames')
+console.log(expectedOrder);
 instanceObjects.loadedModuleNames = expectedOrder
+
 
 var iteratorInst;
 
@@ -107,13 +109,15 @@ tap.test('Iterator load method, correct order', function(t) {
 });
 
 tap.test('Iterator start method, correct order', function(t) {
-
+  var p = []
   iteratorInst.start()
     .then(function(result) {
       result.forEach(function(plugin, k){
+        p.push(plugin.configName)
         t.same(plugin.configName, expectedOrder[k], plugin.configName + ' - Should match expected order ' + expectedOrder[k])
         t.ok(plugin.started, plugin.declaredName + ' started.');
       })
+      console.log(p);
       t.end()
       return null
     })
@@ -126,6 +130,7 @@ tap.test('Iterator stop method, correct order', function(t) {
     .then(function(result) {
       var reverseExpected = expectedOrder.reverse()
       result.forEach(function(plugin, k){
+
         t.same(plugin.configName, reverseExpected[k], plugin.configName + ' - Should match expected order ' + reverseExpected[k])
         // t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
       })
