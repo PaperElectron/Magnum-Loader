@@ -43,7 +43,6 @@ tap.test('Recursively Loads multi plugins', function(t) {
   var t6 = Loader.Injector.get('Test_6');
   var t7 = Loader.Injector.get('Test_7');
   var t8 = Loader.Injector.get('Test_8');
-  console.log(t1);
 
   t.equal(t1.parent, 'magnum-multi', 'Has correct parent module name')
   t.equal(t2.parent, 'magnum-multi', 'Has correct parent module name')
