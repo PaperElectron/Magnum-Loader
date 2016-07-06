@@ -45,7 +45,7 @@ var instanceObjects = {
 };
 
 FrameworkInjector.service('Options', instanceObjects.FrameworkOptions)
-FrameworkInjector.service('LoadedModuleNames', ['TestC','TestD','TestE','TestF','TestG','TestA','TestB'])
+FrameworkInjector.service('LoadedModuleNames', ['TestC','TestG','TestF','TestD','TestE','TestA','TestB'])
 FrameworkInjector.service('LoggerBuilder', function(){
   return mockConsole()
 })
@@ -95,6 +95,7 @@ tap.test('Iterator load method, correct order', function(t) {
   iteratorInst.load()
     .then(function(result) {
       result.forEach(function(plugin, k){
+        console.log(plugin.configName);
         t.same(plugin.configName, expectedOrder[k], plugin.configName + ' - Should match expected order ' + expectedOrder[k])
         t.ok(plugin.loaded, plugin.declaredName + ' loaded.');
       })
