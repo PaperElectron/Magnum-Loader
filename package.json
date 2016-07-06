@@ -29,7 +29,7 @@
     "fs-extra": "^0.26.7",
     "lodash": "^4.3.0",
     "magnum-di": "^2.2.0",
-    "magnum-topo": "^0.2.0",
+    "magnum-topo": "^0.3.0",
     "parent-require": "^1.0.0",
     "should": "^8.0.2"
   },
