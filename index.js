@@ -81,10 +81,25 @@ module.exports = function(pkgJson, frameworkOpts){
     process.exit()
   }
 
+  /**
+   * TODO - This needs to map any exported params to the plugins configName
+   * Currently this breaks if a plugin depends on a parameter name rather than
+   * a plugin configName. See magnum-topo for implementation hints.
+   * usage is in PluginBase#CheckDepends
+   * @author - Jim Bulkowski
+   * @date - 7/4/16
+   * @time - 1:35 AM
+   */
+
+
   Shared.loadedModuleNames = _.chain(loadedPlugins).map(function(plugin) {
-    return plugin.configName
-  }).uniq().value()
-  
+    var arr = [plugin.configName]
+    if(plugin.paramName){
+      arr.push(FrameworkInjector.get('NameGenerator')(plugin.paramName))
+    }
+    return arr
+  }).flatten().uniq().value()
+
   FrameworkInjector.service('LoadedModuleNames', Shared.loadedModuleNames)
 
   var iterator = new PluginIterator(loadedPlugins, Shared);
