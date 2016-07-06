@@ -1,5 +1,5 @@
 /**
- * @file setParam
+ * @file noParam
  * @author Jim Bulkowski <jim.b@paperelectron.com>
  * @project Pomegranate-loader
  * @license MIT {@link http://opensource.org/licenses/MIT}
@@ -7,15 +7,15 @@
 
 
 exports.metadata = {
-  name: 'setParameter',
-  type: 'service',
-  param: 'setParam'
+  name: 'noParam',
+  type: 'action',
+  depends: ['setParam']
 }
 
 exports.plugin = {
   load: function(inject, loaded) {
 
-    loaded(null, {p: 'set parameter'})
+    loaded(null, null)
   },
   start: function(done) {
     done()

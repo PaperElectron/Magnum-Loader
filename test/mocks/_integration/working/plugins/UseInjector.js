@@ -17,7 +17,9 @@ exports.metadata = {
   name: 'UseInjector',
   layer: 'dependency',
   type: 'service',
+  depends: ['TestPlugin'],
   param: 'InjectorTest'
+
 }
 
 exports.plugin = {
