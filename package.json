@@ -1,6 +1,6 @@
 {
   "name": "magnum-loader",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Plugin loader for the Magnum DI dependency injection framework.",
   "main": "index.js",
   "scripts": {
