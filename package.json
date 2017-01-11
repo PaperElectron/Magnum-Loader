@@ -22,6 +22,9 @@
     "lib/",
     "Readme.md"
   ],
+  "engines": {
+    "node": ">= 4.0"
+  },
   "dependencies": {
     "bluebird": "^3.4.7",
     "chalk": "^1.1.3",
