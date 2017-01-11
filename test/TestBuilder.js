@@ -1,6 +1,8 @@
 /**
  * Created by monstertke on 1/7/17.
  */
+'use strict';
+
 let DI = require('magnum-di');
 let NameGenerator = require('../lib/Validation/NameGenerator')
 let Iterator = require('../lib/PluginIterator')

@@ -4,6 +4,7 @@
  * @project magnum-loader-2
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
+'use strict';
 
 const DI_version = require('magnum-di/package.json').version
 const TOPO_version = require('magnum-topo/package.json').version

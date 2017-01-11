@@ -6,6 +6,7 @@
  */
 
 'use strict';
+
 var tap = require('tap');
 var g = require('../../lib/Validation/NameGenerator');
 var generate = g('magnum');
