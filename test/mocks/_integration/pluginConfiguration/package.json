@@ -1,8 +1,0 @@
-{
-  "name": "test-working",
-  "dependencies": {
-    "magnum-config-disabled": "0.0.0",
-    "magnum-config-single": "0.0.0",
-    "magnum-config-multiple": "0.0.0"
-  }
-}
