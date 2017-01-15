@@ -13,6 +13,8 @@ const LOADER_version = require('./package.json').version
 const Injector = require('magnum-di')
 const OptionParser = require('./lib/OptionsParser')
 const NameGenerator = require('./lib/Validation/NameGenerator')
+const PrefixGenerator = require('./lib/Validation/PrefixGenerator')
+const PrefixSelector = require('./lib/Validation/PrefixSelector')
 const FrameworkErrors = require('./lib/Errors')
 const AppendLogger = require('./lib/LoggerBuilder')
 const FindPlugins = require('./lib/PluginFinder')
@@ -40,7 +42,6 @@ module.exports = function(pkgJson, frameworkOpts) {
   // Validate passed in options, I should probably add an exit here on bad data.
   let FrameworkOptions = OptionParser(frameworkOpts, FrameworkErrors)
 
-
   /*
    * Set all of the available loggers for use elsewhere,
    * System and FrameworkLogger are identical, except SystemLogger can be silenced. with the verbose option.
@@ -49,11 +50,13 @@ module.exports = function(pkgJson, frameworkOpts) {
   let BaseLogger = FrameworkOptions.logger
   let SystemLogger = AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, FrameworkOptions.verbose, 'magenta')
   let FrameworkLogger = AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, true, 'magenta')
-
+  let currentPrefixes = PrefixGenerator(frameworkOpts.prefix, frameworkOpts.additionalPrefix)
 
   // Set up all of the needed framework injectables.
+  FrameworkInjector.service('Prefixes', currentPrefixes)
+  FrameworkInjector.service('PrefixSelector', PrefixSelector(currentPrefixes))
   FrameworkInjector.service('Options', FrameworkOptions)
-  FrameworkInjector.service('NameGenerator', NameGenerator(frameworkOpts.prefix));
+  FrameworkInjector.service('NameGenerator', NameGenerator);
   FrameworkInjector.service('FrameworkErrors', FrameworkErrors)
   FrameworkInjector.service('FrameworkEvents', FrameworkEvents)
   FrameworkInjector.service('Output', Output);
@@ -70,20 +73,23 @@ module.exports = function(pkgJson, frameworkOpts) {
   /*
    * Output Some version info
    */
+  if(frameworkOpts.wrapperVersion){
+    FrameworkLogger.log(`FRAMEWORK version ${frameworkOpts.wrapperVersion} ready`)
+  }
+
   FrameworkLogger.log(`DI version: ${DI_version} ready.`)
   FrameworkLogger.log(`TOPO version: ${TOPO_version} ready.`)
   FrameworkLogger.log(`LOADER version: ${LOADER_version} ready.`)
 
-  let PackageDependencies = Object.keys(pkgJson.dependencies)
+  let PackageDependencies = Object.keys(pkgJson.dependencies || {})
 
 
   try {
-    FrameworkLogger.log('Discovering plugins.')
     FoundPlugins = FindPlugins(PackageDependencies, FrameworkInjector)
   }
   catch(e){
-    FrameworkInjector.get('FrameworkErrors');FrameworkLogger.error('Something went wrong discovering plugins.')
-    FrameworkInjector.get('FrameworkErrors');FrameworkLogger.error(e.stack)
+    FrameworkLogger.error('Something went wrong discovering plugins.')
+    FrameworkLogger.error(e.stack)
     process.exit()
   }
 
