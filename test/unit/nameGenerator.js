@@ -9,7 +9,7 @@
 
 var tap = require('tap');
 var g = require('../../lib/Validation/NameGenerator');
-var generate = g('magnum');
+var generate = g(['magnum']);
 /**
  *
  * @module nameGenerator

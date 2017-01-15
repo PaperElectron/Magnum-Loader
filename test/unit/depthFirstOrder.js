@@ -22,6 +22,7 @@ let CurrentTest = new TestBuilder()
 var DependencyInjector = CurrentTest.getPluginDI()// DI();
 var FrameworkInjector = CurrentTest.getFrameworkDI();
 var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validation/NameGenerator'))
+var PrefixSelector = require(path.join(__dirname, '../../','lib/Validation/PrefixSelector'))
 var Iterator = require('../../lib/PluginIterator');
 // var Output = require('../../lib/Outputs');
 // var RawPlugin = require('../../lib/RawPlugin/Types/Dependency');
@@ -54,7 +55,10 @@ FrameworkInjector.service('LoggerBuilder', function(){
   return CurrentTest.mockConsole()
 })
 
-FrameworkInjector.service('NameGenerator', NameGenerator('magnum'))
+FrameworkInjector.service('NameGenerator', NameGenerator)
+
+FrameworkInjector.service('Prefixes', ['magnum'])
+FrameworkInjector.service('PrefixSelector', PrefixSelector(['magnum']))
 
 FrameworkInjector.service('FrameworkErrors', instanceObjects.FrameworkErrors)
 FrameworkInjector.service('Output', instanceObjects.Loggers.Output);
