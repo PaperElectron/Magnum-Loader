@@ -11,7 +11,7 @@ var _ = require('lodash');
 var stripAnsi = require('strip-ansi')
 
 var Console = {
-  log: function(){
+  log: function(a){
   },
   warn: function(){
 
@@ -41,7 +41,7 @@ var Loader = require('../PlatformSetup')('errorHandling', false, Console)
 
 
 tap.test('Load event', function(t) {
-  t.plan(1);
+  t.plan(2);
   Loader.on('ready', function(){
     toTest = makeTest(t, 'HookThrows: Encountered an error while loading. *** ReferenceError: this_throws is not defined');
     Loader.load();

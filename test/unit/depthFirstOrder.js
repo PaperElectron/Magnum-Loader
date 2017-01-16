@@ -131,7 +131,6 @@ tap.test('Iterator stop method, correct order', function(t) {
     .then(function(result) {
       var reverseExpected = expectedOrder.reverse()
       result.forEach(function(plugin, k){
-
         t.same(plugin.configName, reverseExpected[k], plugin.configName + ' - Should match expected order ' + reverseExpected[k])
         // t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
       })
