@@ -5,6 +5,8 @@
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
+'use strict';
+
 var tap = require('tap');
 var mockery = require('mockery');
 mockery.enable({

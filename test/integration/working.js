@@ -97,7 +97,7 @@ tap.test('Plugin TestG should be disabled from config setting', function(t){
   t.notOk(G, 'TestG should not have loaded a dependency.')
 });
 
-tap.test('Plugins have access to the injector object inside the load hook.', function(t) {
+tap.test('Plugins have access to the PluginInjector object inside the load hook.', function(t) {
   t.plan(2)
   var UseInjector = Loader.Injector.get('InjectorTest');
   t.ok(UseInjector.Injected, 'Plugin returned its dependency correctly.');

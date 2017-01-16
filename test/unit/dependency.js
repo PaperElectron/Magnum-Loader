@@ -5,6 +5,8 @@
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
+'use strict';
+
 var tap = require('tap');
 var mockery = require('mockery');
 var path = require('path');
@@ -28,7 +30,7 @@ tap.test('Dependency injection into Magnum Di', function(t){
   var dep = new Dependency('parent', 'dependency', {name: 'dependency'}, 'service', Errors);
   t.equal(dep instanceof Dependency, true, "Creates a Dependency instance.");
   t.doesNotThrow(dep.inject.bind(dep, injector), "Injects its dependency.")
-  t.throws(dep.inject.bind(dep, injector), "Throws on injector name conflict.")
+  t.throws(dep.inject.bind(dep, injector), "Throws on DependencyInjector name conflict.")
 })
 
 tap.test('Setting default injection type', function(t){

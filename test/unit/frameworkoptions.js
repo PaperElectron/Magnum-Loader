@@ -5,10 +5,12 @@
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
 
+'use strict';
+
 var tap = require('tap');
 var path = require('path');
 var Errors = require('../../lib/Errors');
-var OptsParser = require('../../lib/FrameworkOptions');
+var OptsParser = require('../../lib/OptionsParser');
 
 
 tap.test('Throws correct errors on missing or bad required params.', function(t) {

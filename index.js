@@ -1,108 +1,113 @@
 /**
- * @file index.js
+ * @file index
  * @author Jim Bulkowski <jim.b@paperelectron.com>
- * @project Magnum-loader
+ * @project magnum-loader-2
  * @license MIT {@link http://opensource.org/licenses/MIT}
  */
-
 'use strict';
-var version = require('./package.json').version
-var Injector = require('magnum-di');
-var PluginFactory = require('./lib/PluginFactory');
-var PluginIterator = require('./lib/PluginIterator');
-var MagnumLoader = require('./lib/MagnumLoader');
-var OptionParser = require('./lib/FrameworkOptions');
-var Errors = require('./lib/Errors');
-var AppendLogger = require('./lib/LoggerBuilder');
-var NameGenerator = require('./lib/Validators/NameGenerator');
-var _ = require('lodash');
-var Events = require('events').EventEmitter;
-var SharedEvents = new Events();
 
-/**
- * Bit of boilerplate to setup things that are used everywhere.
- * MagnumLoader Object itself is a fairly complex facade that spans several
- * other objects, trying to keep it as simple as possible.
- *
- * @param pkgJson Package.json file, better correspond to the nearest node_modules
- * @param frameworkOpts Configure the loader itself.
- * @param pluginOpts
- * @returns {MagnumLoader}
- */
-module.exports = function(pkgJson, frameworkOpts){
-  var PluginInjector = new Injector();
-  var FrameworkInjector = new Injector();
+const DI_version = require('magnum-di/package.json').version
+const TOPO_version = require('magnum-topo/package.json').version
+const LOADER_version = require('./package.json').version
 
-  var FrameworkOptions = OptionParser(frameworkOpts, Errors);
+const Injector = require('magnum-di')
+const OptionParser = require('./lib/OptionsParser')
+const NameGenerator = require('./lib/Validation/NameGenerator')
+const PrefixGenerator = require('./lib/Validation/PrefixGenerator')
+const PrefixSelector = require('./lib/Validation/PrefixSelector')
+const FrameworkErrors = require('./lib/Errors')
+const AppendLogger = require('./lib/LoggerBuilder')
+const FindPlugins = require('./lib/PluginFinder')
+const PluginValidator = require('./lib/PluginValidator')
+const PluginBuilder = require('./lib/PluginBuilder')
+const PluginIterator = require('./lib/PluginIterator')
+const MagnumLoader = require('./lib/MagnumLoader')
 
-  FrameworkInjector.service('Options', FrameworkOptions);
+const EventEmitter = require('events').EventEmitter;
+const FrameworkEvents = new EventEmitter()
+
+module.exports = function(pkgJson, frameworkOpts) {
+
+  /*
+   * Instantiate Dependency Injectors for the lifetime of this run
+   * FrameworkInjector contains objects for use internally,
+   * PluginInjector contains Plugin objects for use at runtime.
+   */
+  let FrameworkInjector = new Injector()
+  let PluginInjector = new Injector()
+  let FoundPlugins
+  let ValidatedPlugins
+  let ReadyPlugins
+
+  // Validate passed in options, I should probably add an exit here on bad data.
+  let FrameworkOptions = OptionParser(frameworkOpts, FrameworkErrors)
+
+  /*
+   * Set all of the available loggers for use elsewhere,
+   * System and FrameworkLogger are identical, except SystemLogger can be silenced. with the verbose option.
+   */
+  let Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
+  let BaseLogger = FrameworkOptions.logger
+  let SystemLogger = AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, FrameworkOptions.verbose, 'magenta')
+  let FrameworkLogger = AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, true, 'magenta')
+  let currentPrefixes = PrefixGenerator(frameworkOpts.prefix, frameworkOpts.additionalPrefix)
+
+  // Set up all of the needed framework injectables.
+  FrameworkInjector.service('Prefixes', currentPrefixes)
+  FrameworkInjector.service('PrefixSelector', PrefixSelector(currentPrefixes))
+  FrameworkInjector.service('Options', FrameworkOptions)
+  FrameworkInjector.service('NameGenerator', NameGenerator);
+  FrameworkInjector.service('FrameworkErrors', FrameworkErrors)
+  FrameworkInjector.service('FrameworkEvents', FrameworkEvents)
+  FrameworkInjector.service('Output', Output);
   FrameworkInjector.service('LoggerBuilder', AppendLogger);
-  FrameworkInjector.service('NameGenerator', NameGenerator(FrameworkOptions.prefix));
+  FrameworkInjector.service('Logger', BaseLogger)
+  FrameworkInjector.service('FrameworkLogger', FrameworkLogger)
+  FrameworkInjector.service('SystemLogger', SystemLogger)
 
-  var Output = require('./lib/Outputs')(FrameworkOptions.colors, FrameworkOptions.verbose);
-  var Loggers = {
-    Output: Output,
-    Logger: FrameworkOptions.logger,
-    SystemLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, FrameworkOptions.verbose, 'magenta'),
-    FrameworkLogger: AppendLogger(FrameworkOptions.logger, FrameworkOptions.prefix, Output, true, 'magenta')
-  };
-  PluginInjector.service('Errors', Errors);
-  PluginInjector.service('Logger', Loggers.Logger);
+  //Setup needed Dependency injectables
+  PluginInjector.service('Errors', FrameworkErrors);
+  PluginInjector.service('Logger', BaseLogger);
   PluginInjector.service('Env', process.env);
 
-  Loggers.FrameworkLogger.log('Loader version '+ version + ' setup complete')
-
-  var pkgDependencies = _.keys(pkgJson.dependencies)
-  if(!pkgDependencies){
-    Loggers.FrameworkLogger.log('No Dependencies found in package.json.')
+  /*
+   * Output Some version info
+   */
+  if(frameworkOpts.wrapperVersion){
+    FrameworkLogger.log(`FRAMEWORK version ${frameworkOpts.wrapperVersion} ready`)
   }
 
-  var Shared = {
-    SharedEvents: SharedEvents,
-    FrameworkInjector: FrameworkInjector,
-    Injector: PluginInjector,
-    Loggers: Loggers,
-    Output: Loggers.Output,
-    FrameworkErrors: Errors,
-    FrameworkOptions: FrameworkOptions,
+  FrameworkLogger.log(`DI version: ${DI_version} ready.`)
+  FrameworkLogger.log(`TOPO version: ${TOPO_version} ready.`)
+  FrameworkLogger.log(`LOADER version: ${LOADER_version} ready.`)
 
-    applicationDirectory: FrameworkOptions.applicationDirectory,
-    ParentDirectory: FrameworkOptions.parentDirectory,
-    additionalPluginDirectory: FrameworkOptions.pluginDirectory,
-    pluginSettingsDirectory: FrameworkOptions.pluginSettingsDirectory,
-    loaderPrefix: FrameworkOptions.prefix
-  }
+  let PackageDependencies = Object.keys(pkgJson.dependencies || {})
+
+
   try {
-    var loadedPlugins = PluginFactory(pkgDependencies, Shared);
+    FoundPlugins = FindPlugins(PackageDependencies, FrameworkInjector)
   }
-  catch(err){
-    console.log(err.stack);
-    Shared.Loggers.FrameworkLogger.error(Output.failedToLoad( err.failedRequire ) )
+  catch(e){
+    FrameworkLogger.error('Something went wrong discovering plugins.')
+    FrameworkLogger.error(e.stack)
     process.exit()
   }
 
-  /**
-   * TODO - This needs to map any exported params to the plugins configName
-   * Currently this breaks if a plugin depends on a parameter name rather than
-   * a plugin configName. See magnum-topo for implementation hints.
-   * usage is in PluginBase#CheckDepends
-   * @author - Jim Bulkowski
-   * @date - 7/4/16
-   * @time - 1:35 AM
-   */
+  try {
+    ValidatedPlugins =  PluginValidator(FoundPlugins, FrameworkInjector)
+  }
+  catch(e){
+    // console.log(e);
+  }
 
+  try {
+    ReadyPlugins = PluginBuilder(ValidatedPlugins, FrameworkInjector, PluginInjector)
+  }
+  catch(e){
+    console.log(e);
+  }
 
-  Shared.loadedModuleNames = _.chain(loadedPlugins).map(function(plugin) {
-    var arr = [plugin.configName]
-    if(plugin.paramName){
-      arr.push(FrameworkInjector.get('NameGenerator')(plugin.paramName))
-    }
-    return arr
-  }).flatten().uniq().value()
+  let RuntimeIterator = new PluginIterator(ReadyPlugins, FrameworkInjector)
 
-  FrameworkInjector.service('LoadedModuleNames', Shared.loadedModuleNames)
-
-  var iterator = new PluginIterator(loadedPlugins, Shared);
-
-  return MagnumLoader(iterator, Shared);
-};
+  return MagnumLoader(RuntimeIterator, FrameworkInjector, PluginInjector)
+}

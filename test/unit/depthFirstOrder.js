@@ -14,62 +14,66 @@ mockery.enable({
   useCleanCache: true,
   warnOnUnregistered: false
 });
-var DI = require('magnum-di');
-var injector = DI();
-var FrameworkInjector = DI();
-var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validators/NameGenerator'))
+
+let TestBuilder = require('../TestBuilder')
+let CurrentTest = new TestBuilder()
+
+// var DI = require('magnum-di');
+var DependencyInjector = CurrentTest.getPluginDI()// DI();
+var FrameworkInjector = CurrentTest.getFrameworkDI();
+var NameGenerator = require(path.join(__dirname, '../../', 'lib/Validation/NameGenerator'))
+var PrefixSelector = require(path.join(__dirname, '../../','lib/Validation/PrefixSelector'))
 var Iterator = require('../../lib/PluginIterator');
-var Output = require('../../lib/Outputs');
-var RawPlugin = require('../../lib/RawPlugin/Types/Dependency');
-var Plugin = require('../../lib/Plugin/Plugin');
+// var Output = require('../../lib/Outputs');
+// var RawPlugin = require('../../lib/RawPlugin/Types/Dependency');
+// var Plugin = require('../../lib/Plugin/Plugin');
 
 
-var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validators/FrameworkOptionValidators'));
+// var OptionValidators = require(path.join(__dirname, '../../', 'lib/Validation/FrameworkOptionValidators'));
 var mockSettingsPath = path.join(__dirname, '../mocks/_unit/depthFirstOrder/pluginSettings');
 var instanceObjects = {
   ParentDirectory: path.join(__dirname, '../'),
   Loggers: {
-    SystemLogger: mockConsole(),
-    FrameworkLogger: mockConsole(),
-    Output: Output(false, false)
+    SystemLogger: CurrentTest.mockConsole(),
+    FrameworkLogger: CurrentTest.mockConsole(),
+    Output: CurrentTest.getOutput(false, false)
   },
   FrameworkErrors: require('../../lib/Errors'),
-  Injector: injector,
+  Injector: DependencyInjector,
   FrameworkInjector: FrameworkInjector,
   FrameworkOptions: {
     prefix: 'magnum',
     timeout: 2000,
     layers: ['core'],
-    pluginSettingsDirectory: OptionValidators.findPluginSettings(mockSettingsPath)
+    pluginSettingsDirectory: CurrentTest.findPluginSettings(mockSettingsPath)
   }
 };
 
 FrameworkInjector.service('Options', instanceObjects.FrameworkOptions)
 FrameworkInjector.service('LoadedModuleNames', ['TestB','TestC','TestG','TestA','TestF','TestE','TestD'])
 FrameworkInjector.service('LoggerBuilder', function(){
-  return mockConsole()
+  return CurrentTest.mockConsole()
 })
 
-FrameworkInjector.service('NameGenerator', NameGenerator('magnum'))
+FrameworkInjector.service('NameGenerator', NameGenerator)
 
-var Shared = {
-  ParentDirectory: instanceObjects.ParentDirectory,
-  Logger: instanceObjects.Loggers.Logger,
-  Injector: instanceObjects.Injector,
-  FrameworkInjector: instanceObjects.FrameworkInjector,
-  Output: instanceObjects.Loggers.Output,
-  FrameworkErrors: instanceObjects.FrameworkErrors,
-  FrameworkOptions: instanceObjects.FrameworkOptions
-};
+FrameworkInjector.service('Prefixes', ['magnum'])
+FrameworkInjector.service('PrefixSelector', PrefixSelector(['magnum']))
+
+FrameworkInjector.service('FrameworkErrors', instanceObjects.FrameworkErrors)
+FrameworkInjector.service('Output', instanceObjects.Loggers.Output);
+FrameworkInjector.service('Logger', console)
+FrameworkInjector.service('FrameworkLogger', instanceObjects.Loggers.FrameworkLogger)
+FrameworkInjector.service('SystemLogger', instanceObjects.Loggers.SystemLogger)
 
 var plugins = [
-  makePlugin('test-a'),
-  makePlugin('test-b'),
-  makePlugin('test-c'),
-  makePlugin('test-d', ['TestE']),
-  makePlugin('test-e', ['TestF']),
-  makePlugin('test-f', ['TestG']),
-  makePlugin('test-g')
+  CurrentTest.makePlugin('test-a'),
+  CurrentTest.makePlugin('test-b'),
+  CurrentTest.makePlugin('test-c'),
+  CurrentTest.makePlugin('test-d', ['TestE']),
+  CurrentTest.makePlugin('test-e', ['TestF']),
+  CurrentTest.makePlugin('test-f', ['TestG']),
+  CurrentTest.makePlugin('test-g')
 ]
 var expectedOrder = FrameworkInjector.get('LoadedModuleNames')
 instanceObjects.loadedModuleNames = expectedOrder
@@ -80,7 +84,7 @@ var iteratorInst;
 tap.test('Iterator instantiation', function(t) {
   t.plan(1);
   try {
-    iteratorInst = new Iterator(plugins, instanceObjects);
+    iteratorInst = new Iterator(plugins, FrameworkInjector);
   }
   catch(e){
     console.log(e.stack);
@@ -127,7 +131,6 @@ tap.test('Iterator stop method, correct order', function(t) {
     .then(function(result) {
       var reverseExpected = expectedOrder.reverse()
       result.forEach(function(plugin, k){
-
         t.same(plugin.configName, reverseExpected[k], plugin.configName + ' - Should match expected order ' + reverseExpected[k])
         // t.ok(plugin.stopped, plugin.declaredName + ' stopped.');
       })
@@ -140,46 +143,46 @@ tap.test('Iterator stop method, correct order', function(t) {
 
 
 
-function makePlugin(moduleName, depends, provides) {
-  var pArgs =
-        {
-          loaded: {
-            options: {name: moduleName},
-            metadata: {
-              name: moduleName,
-              layer: 'core',
-              type: 'service',
-              depends: depends || [],
-              provides: provides || [],
-              param: moduleName.replace('-', '_')},
-            plugin: {
-              load: function(inject, loaded) {
-                loaded(null, {name: moduleName})
-              },
-              start: function(done) {
-                done()
-              },
-              stop: function(done) {
-                done()
-              }
-            }
-          },
-          moduleName: moduleName
-        };
-  var plugin = new RawPlugin(pArgs, instanceObjects.FrameworkOptions.layers)
-  return new Plugin(plugin, Shared)
-}
-
-function mockConsole() {
-  // return console
-  return {
-    log: function() {
-    },
-    error: function() {
-    },
-    info: function() {
-    },
-    warn: function() {
-    },
-  }
-}
+// function makePlugin(moduleName, depends, provides) {
+//   var pArgs =
+//         {
+//           loaded: {
+//             options: {name: moduleName},
+//             metadata: {
+//               name: moduleName,
+//               layer: 'core',
+//               type: 'service',
+//               depends: depends || [],
+//               provides: provides || [],
+//               param: moduleName.replace('-', '_')},
+//             plugin: {
+//               load: function(inject, loaded) {
+//                 loaded(null, {name: moduleName})
+//               },
+//               start: function(done) {
+//                 done()
+//               },
+//               stop: function(done) {
+//                 done()
+//               }
+//             }
+//           },
+//           moduleName: moduleName
+//         };
+//   var plugin = new RawPlugin(pArgs)
+//   return new Plugin(plugin, FrameworkInjector, DependencyInjector)
+// }
+//
+// function mockConsole() {
+//   // return console
+//   return {
+//     log: function() {
+//     },
+//     error: function() {
+//     },
+//     info: function() {
+//     },
+//     warn: function() {
+//     },
+//   }
+// }
