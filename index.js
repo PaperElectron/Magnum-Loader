@@ -27,7 +27,6 @@ const EventEmitter = require('events').EventEmitter;
 const FrameworkEvents = new EventEmitter()
 
 module.exports = function(pkgJson, frameworkOpts) {
-
   /*
    * Instantiate Dependency Injectors for the lifetime of this run
    * FrameworkInjector contains objects for use internally,
@@ -41,7 +40,6 @@ module.exports = function(pkgJson, frameworkOpts) {
 
   // Validate passed in options, I should probably add an exit here on bad data.
   let FrameworkOptions = OptionParser(frameworkOpts, FrameworkErrors)
-
   /*
    * Set all of the available loggers for use elsewhere,
    * System and FrameworkLogger are identical, except SystemLogger can be silenced. with the verbose option.
@@ -73,6 +71,10 @@ module.exports = function(pkgJson, frameworkOpts) {
   /*
    * Output Some version info
    */
+  if(frameworkOpts.commandMode){
+    FrameworkLogger.warn(`Warning! Framework is starting in command mode.`)
+  }
+
   if(frameworkOpts.wrapperVersion){
     FrameworkLogger.log(`FRAMEWORK version ${frameworkOpts.wrapperVersion} ready`)
   }
